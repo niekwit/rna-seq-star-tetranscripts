@@ -1,0 +1,33 @@
+genome: mm10
+ensembl_genome_build: "110"
+strand: reverse # https://pypi.org/project/TEtranscripts/
+pvalue_cutoff: 0.001 #cut off for plotting
+mapping: # STAR mapping parameters
+  outFilterMultimapNmax: "100"
+  winAnchorMultimapNmax: "100"
+  extra_params : "" # additional arguments to pass to STAR
+resources: #computing resources
+  account: JNATHAN-SL3-CPU
+  partition: cclake
+  max_jobs: 300
+  trim:
+    cpu: 8
+    time: 60
+  fastqc:
+    cpu: 4
+    time: 60
+  mapping:
+    cpu: 10
+    time: 120
+  samtools:
+    cpu: 4
+    time: 30
+  deeptools:
+    cpu: 6
+    time: 60
+  deseq2:
+    cpu: 6
+    time: 60 
+  plotting:
+    cpu: 2
+    time: 20
