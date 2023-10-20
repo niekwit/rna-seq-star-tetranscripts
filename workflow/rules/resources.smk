@@ -4,13 +4,12 @@ rule get_fasta:
     retries: 3
     params:
         url=resources.fasta_url,
-        fa=resources.fasta,
     log:
         "logs/resources/get_fasta.log"
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {params.fa}.gz && gunzip -f {params.fa}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
 
 
 rule get_gtf: 
@@ -19,13 +18,12 @@ rule get_gtf:
     retries: 3
     params:
         url=resources.gtf_url,
-        gtf=resources.gtf,
     log:
         "logs/resources/get_gtf.log"
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {params.gtf}.gz && gunzip -f {params.gtf}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
 
 
 rule get_te_gtf:
@@ -34,13 +32,12 @@ rule get_te_gtf:
     retries: 3
     params:
         url=resources.tegtf_url,
-        gtf=resources.tegtf,
     log:
         "logs/resources/get_te_gtf.log"
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {params.gtf}.gz && gunzip -f {params.gtf}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
 
 
 rule combined_gtf:
