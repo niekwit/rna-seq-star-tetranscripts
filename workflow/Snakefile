@@ -49,12 +49,12 @@ os.makedirs("logs/snakemake", exist_ok=True)
 
 onsuccess: 
     shell("cp -v {log} {snake_log}")
-    shell("pigz {genome.fasta} {genome.gtf} {genome.tegtf}") # compress genome files
+    shell(f"pigz {genome.fasta} {genome.gtf} {genome.tegtf}") # compress genome files
     print("Analysis finished successfully!")
 
 onerror:
     shell("cp -v {log} {snake_log}")
-    print("Analysis (partly) failed...\nCheck {snake_log} for details")
+    print(f"Analysis (partly) failed...\nCheck {snake_log} for details")
 
 
 
