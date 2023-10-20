@@ -1,5 +1,4 @@
 import pandas as pd
-import click
 import sys
 
 def import_samples():
@@ -10,5 +9,5 @@ def import_samples():
         return SAMPLES
 
     except FileNotFoundError:
-        click.secho("ERROR: config/samples.csv not found!", fg="red")
+        print("ERROR: config/samples.csv not found!")
         sys.exit(1)
