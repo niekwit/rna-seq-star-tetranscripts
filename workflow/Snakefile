@@ -1,4 +1,60 @@
-# Main entrypoint of the workflow. 
-# Please follow the best practices: 
-# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+import os
+import click
+from scripts.resources import Resources
+from scripts import general_functions as gf
+
+# load config file
+configfile: "config/experiment.yaml"
+
+# load resources to be used in rules
+resources = Resources(config["genome"], config["ensembl_genome_build"])
+
+# get sample names
+SAMPLES = gf.import_samples()
+
+# set STAR parameters
+ofmn = config["mapping"]["outFilterMultimapNmax"]
+wamn = config["mapping"]["winAnchorMultimapNmax"]
+extra_params = config["mapping"]["extra_params"]
+
+os.makedirs("resources", exist_ok=True)
+
+star_extra = f"--outFilterMultimapNmax {ofmn} --winAnchorMultimapNmax {wamn} {extra_params}" 
+
+# import rules
+include: "rules/fastqc.smk"
+include: "rules/trimming.smk"
+include: "rules/resources.smk"
+include: "rules/mapping.smk"
+include: "rules/te_quantification.smk"
+include: "rules/deseq2.smk"
+include: "rules/plotting.smk"
+
+# set local rules, i.e. rules that are not executed on a compute node
+localrules: all, get_fasta, get_gtf, get_te_gtf, combined_gtf
+
+# target rule
+rule all:
+    input: 
+        "results/plots/mapping_rates.pdf",
+        "results/deseq2/deseq2_genes.xlsx",
+        "results/deseq2/deseq2_te.xlsx",
+        "results/plots/pca.pdf",
+        "results/plots/sample_distance.pdf",
+
+
+# save snakemake terminal output to log file
+snake_log = "logs/snakemake/snakemake.log"
+os.makedirs("logs/snakemake", exist_ok=True)
+
+onsuccess: 
+    shell("cp -v {log} {snake_log}")
+    shell("pigz {genome.fasta} {genome.gtf} {genome.tegtf}") # compress genome files
+    click.secho("Analysis finished successfully!", fg="green")
+
+onerror:
+    shell("cp -v {log} {snake_log}")
+    click.secho("Analysis (partly) failed...\nCheck {snake_log} for details", fg="red")
+
+
+
