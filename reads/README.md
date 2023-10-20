@@ -1,0 +1,3 @@
+Copy raw sequencing data here.
+Files should end with (paired-end data only supported so far): 
+*_R1.fastq.gz* or *_R2.fastq.gz*
