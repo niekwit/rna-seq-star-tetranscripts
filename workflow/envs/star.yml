@@ -1,0 +1,9 @@
+name: star
+channels: 
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - star=2.7.10b
+  - deeptools=3.5.2
+  - samtools=1.17
