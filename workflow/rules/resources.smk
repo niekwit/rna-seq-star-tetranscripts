@@ -7,6 +7,8 @@ rule get_fasta:
         fa=resources.fasta,
     log:
         "logs/resources/get_fasta.log"
+    conda:
+        "../envs/mapping.yml"
     shell:
         "wget -q {params.url} -O {params.fa}.gz && gunzip -f {params.fa}.gz 2> {log}"
 
@@ -20,6 +22,8 @@ rule get_gtf:
         gtf=resources.gtf,
     log:
         "logs/resources/get_gtf.log"
+    conda:
+        "../envs/mapping.yml"
     shell:
         "wget -q {params.url} -O {params.gtf}.gz && gunzip -f {params.gtf}.gz 2> {log}"
 
@@ -33,6 +37,8 @@ rule get_te_gtf:
         gtf=resources.tegtf,
     log:
         "logs/resources/get_te_gtf.log"
+    conda:
+        "../envs/mapping.yml"
     shell:
         "wget -q {params.url} -O {params.gtf}.gz && gunzip -f {params.gtf}.gz 2> {log}"
 
@@ -43,8 +49,12 @@ rule combined_gtf:
         te_gtf=resources.tegtf,
     output:
         temp("resources/combined.gtf"),
+    conda:
+        "../envs/mapping.yml"
+    log:
+        "logs/resources/combined_gtf.log"
     shell:
-        "cat {input.gtf} {input.te_gtf} > {output}"
+        "cat {input.gtf} {input.te_gtf} > {output} 2> {log}}"
 
 
 # much quicker than reading gene names from GTF file in R
@@ -56,8 +66,12 @@ rule get_gene_names_from_gtf:
     threads: 1
     resources:
         runtime=10
+    conda:
+        "../envs/mapping.yml"
+    log:
+        "logs/resources/get_gene_names_from_gtf.log"
     shell:
         """
-        grep -o -P '(?<=gene_id ")[^"]*' {input} | sort | uniq > {output}
+        grep -o -P '(?<=gene_id ")[^"]*' {input} | sort | uniq > {output} 2> {log}
         """
 

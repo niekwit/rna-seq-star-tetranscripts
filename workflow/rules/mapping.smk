@@ -6,10 +6,14 @@ rule get_readlength:
         "results/qc/multiqc_data/multiqc_general_stats.txt"
     output:
         "results/qc/readlength.txt",
+    conda:
+        "../envs/mapping.yml"
+    log:
+        "logs/mapping/readlength.log"
     shell:
         """
         set +e
-        awk '{{print $5}}' {input} | sed 1d | sort -nr | uniq | head -1 | awk '{{print $1-1}}' | tee {output} | awk '{{if ($1 ~ /^[0-9]+$/) exit 0; else exit 1}}'
+        awk '{{print $5}}' {input} | sed 1d | sort -nr | uniq | head -1 | awk '{{print $1-1}}' | tee {output} | awk '{{if ($1 ~ /^[0-9]+$/) exit 0; else exit 1}}' 2> {log}
         exitcode=$?
         if [ $exitcode -eq 1 ]
         then
@@ -90,7 +94,9 @@ rule index_bam:
         runtime=config["resources"]["samtools"]["time"]
     conda:
         "../envs/mapping.yml"
+    log:
+        "logs/mapping/index_bam_{sample}.log"
     shell:
-        "samtools index -@ {threads} {input}"
+        "samtools index -@ {threads} {input} 2> {log}"
 
 
