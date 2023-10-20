@@ -1,10 +1,13 @@
 import os
-import click
 from scripts.resources import Resources
 from scripts import general_functions as gf
+from snakemake.utils import min_version
+
+# set minimum snakemake version
+min_version("6.4.1")
 
 # load config file
-configfile: "config/experiment.yaml"
+configfile: "config/config.yaml"
 
 # load resources to be used in rules
 resources = Resources(config["genome"], config["ensembl_genome_build"])
@@ -16,9 +19,6 @@ SAMPLES = gf.import_samples()
 ofmn = config["mapping"]["outFilterMultimapNmax"]
 wamn = config["mapping"]["winAnchorMultimapNmax"]
 extra_params = config["mapping"]["extra_params"]
-
-os.makedirs("resources", exist_ok=True)
-
 star_extra = f"--outFilterMultimapNmax {ofmn} --winAnchorMultimapNmax {wamn} {extra_params}" 
 
 # import rules
@@ -50,11 +50,11 @@ os.makedirs("logs/snakemake", exist_ok=True)
 onsuccess: 
     shell("cp -v {log} {snake_log}")
     shell("pigz {genome.fasta} {genome.gtf} {genome.tegtf}") # compress genome files
-    click.secho("Analysis finished successfully!", fg="green")
+    print("Analysis finished successfully!")
 
 onerror:
     shell("cp -v {log} {snake_log}")
-    click.secho("Analysis (partly) failed...\nCheck {snake_log} for details", fg="red")
+    print("Analysis (partly) failed...\nCheck {snake_log} for details")
 
 
 
