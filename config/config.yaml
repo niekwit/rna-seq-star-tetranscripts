@@ -1,7 +1,8 @@
 genome: mm10
 ensembl_genome_build: "110"
-strand: reverse # https://pypi.org/project/TEtranscripts/
-pvalue_cutoff: 0.001 #cut off for plotting
+strand: reverse # check https://pypi.org/project/TEtranscripts/
+fdr_cutoff: 0.05 #cut off for volcano plots
+fc_cutoff: 0.5 #log2 fold change cut off for volcano plots
 mapping: # STAR mapping parameters
   outFilterMultimapNmax: "100"
   winAnchorMultimapNmax: "100"

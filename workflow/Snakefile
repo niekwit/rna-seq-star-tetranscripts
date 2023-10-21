@@ -37,10 +37,10 @@ localrules: all, get_fasta, get_gtf, get_te_gtf, combined_gtf
 rule all:
     input: 
         "results/plots/mapping_rates.pdf",
-        "results/deseq2/deseq2_genes.xlsx",
-        "results/deseq2/deseq2_te.xlsx",
         "results/plots/pca.pdf",
         "results/plots/sample_distance.pdf",
+        "results/plots/volcano_genes/",
+        "results/plots/volcano_te/",
 
 
 # save snakemake terminal output to log file
