@@ -4,8 +4,8 @@ rule deseq2:
         gtf="resources/combined.gtf",
         genes="resources/all_gene_names.txt",
     output:
-        genes="results/deseq2/deseq2_genes.xlsx",
-        te="results/deseq2/deseq2_te.xlsx",
+        genes=report("results/deseq2/deseq2_genes.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of genes"),
+        te=report("results/deseq2/deseq2_te.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of TEs")),
         rdata="results/deseq2/dds.RData"
     params:
         strand=config["strand"],
@@ -18,5 +18,5 @@ rule deseq2:
     log:
         "logs/deseq2/deseq2.log"
     script:
-        "scripts/deseq2.R"
+        "../scripts/deseq2.R"
 
