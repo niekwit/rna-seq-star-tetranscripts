@@ -1,4 +1,4 @@
-name: deseq2
+name: tetranscripts
 channels: 
   - conda-forge
   - bioconda
