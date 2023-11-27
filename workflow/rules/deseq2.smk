@@ -1,12 +1,11 @@
 rule deseq2:
     input:
         counts=expand("results/te_count/{sample}.cntTable", sample=SAMPLES),
-        gtf="resources/combined.gtf",
-        genes="resources/all_gene_names.txt",
     output:
         genes=report("results/deseq2/deseq2_genes.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of genes"),
-        te=report("results/deseq2/deseq2_te.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of TEs")),
-        rdata="results/deseq2/dds.RData"
+        te=report("results/deseq2/deseq2_te.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of TEs"),
+        rdata="results/deseq2/dds.RData",
+    retries: 8 # gene annotation may fail due to database failed connection
     params:
         strand=config["strand"],
         genome=resources.genome
