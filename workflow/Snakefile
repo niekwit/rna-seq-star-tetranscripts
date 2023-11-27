@@ -1,4 +1,5 @@
 import os
+import datetime
 from scripts.resources import Resources
 from scripts import general_functions as gf
 from snakemake.utils import min_version
@@ -29,27 +30,27 @@ include: "rules/mapping.smk"
 include: "rules/te_quantification.smk"
 include: "rules/deseq2.smk"
 include: "rules/plotting.smk"
-
-# set local rules, i.e. rules that are not executed on a compute node
-localrules: all, get_fasta, get_gtf, get_te_gtf, combined_gtf
+include: "rules/bigwig.smk"
 
 # target rule
 rule all:
     input: 
         "results/plots/mapping_rates.pdf",
-        "results/plots/pca.pdf",
+        f"{resources.fasta}.gz",
+        f"{resources.gtf}.gz",
+        f"{resources.tegtf}.gz",
         "results/plots/sample_distance.pdf",
         "results/plots/volcano_genes/",
         "results/plots/volcano_te/",
-
+        expand("results/bigwig/{sample}.bw", sample=SAMPLES),
 
 # save snakemake terminal output to log file
-snake_log = "logs/snakemake/snakemake.log"
+time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+snake_log = f"logs/snakemake/{time}_snakemake.log"
 os.makedirs("logs/snakemake", exist_ok=True)
 
 onsuccess: 
     shell("cp -v {log} {snake_log}")
-    shell(f"pigz {genome.fasta} {genome.gtf} {genome.tegtf}") # compress genome files
     print("Analysis finished successfully!")
 
 onerror:
