@@ -25,28 +25,18 @@ class Resources:
             self.fasta_url = f"{base_url_ens}fasta/homo_sapiens/dna/Homo_sapiens.{name}.dna.primary_assembly.fa.gz"
             self.gtf_url = f"{base_url_ens}gtf/homo_sapiens/Homo_sapiens.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
-                        
-            # set sha256sums for unzipped genome files
-            self.fasta_sha256 = "1e74081a49ceb9739cc14c812fbb8b3db978eb80ba8e5350beb80d8ad8dfef3b"
-            self.gtf_sha256 = "12582b0db02ebe19c29c5733c6edaa62599fe934af593cb7f24423a14db3186c"
-            self.tegtf_sha256 = "769be0221185480a4acf93632e3e0a492d80f77a88b08d3883670de56dcdba4b"
-                      
+                                  
         elif "mm" in genome:
             if genome == "mm9":
                 name = "GRCm38"
             elif genome == "mm10":
-                name = "GCRm39"
+                name = "GRCm39"
                 
             # create URLs for genome files
             self.fasta_url = f"{base_url_ens}fasta/mus_musculus/dna/Mus_musculus.{name}.dna.primary_assembly.fa.gz"
             self.gtf_url = f"{base_url_ens}gtf/mus_musculus/Mus_musculus.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
-            
-            # set sha256sums for unzipped genome files
-            self.fasta_sha256 = "14571f7559e292baf0a40f9d155c41ede19a04d80fdeb59a0c2dfe566db90552"
-            self.gtf_sha256 = "6efbe1fdbd41d4321daf6d550db240656473b41a107648d6faaf9d61cfdb6c4d"
-            self.tegtf_sha256 = "7f414a6b53b915e50591ff19bf3aeb3802e370acb2a595aa05f5556ef1b99ef7"
-            
+                        
         # downloaded unzipped file names
         self.fasta = self._file_from_url(self.fasta_url)
         self.gtf = self._file_from_url(self.gtf_url)
