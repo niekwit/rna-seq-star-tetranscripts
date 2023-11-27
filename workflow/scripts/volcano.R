@@ -7,17 +7,22 @@ library(ggplot2)
 library(readxl)
 library(ggrepel)
 library(dplyr)
+library(stringr)
+library(cowplot)
 
 # get xlsx files
 genes.xlsx <- snakemake@input[["genes"]]
 te.xlsx <- snakemake@input[["te"]]
 
-# get output directories
+# create output directories
 outdir_genes <- snakemake@output[["genes"]]
 outdir_te <- snakemake@output[["te"]]
 
+dir.create(outdir_genes, showWarnings = FALSE)
+dir.create(outdir_te, showWarnings = FALSE)
+
 # get plotting paramaters
-fdr <- log10(snakemake@params[["fdr"]])
+fdr <- -log10(snakemake@params[["fdr"]])
 fc <- snakemake@params[["fc"]]
 
 # function to plot volcano for each sheet (i.e. DESeq2 contrast) in given xlsx
@@ -29,7 +34,7 @@ volcano <- function(xlsx, outdir){
   
     # get contrast name
     contrast <- i
-    print(paste0("Generating heatmap for ",contrast,"..."))
+    print(paste0("Generating volcano for ",contrast," in ",outdir,"..."))
     
     # log transform padj
     df$log.padj <- -log10(df$padj)
@@ -44,7 +49,7 @@ volcano <- function(xlsx, outdir){
         log2FoldChange < -fc & log.padj > fdr ~ "blue",
         log2FoldChange < fc & log.padj < fdr ~ "grey40",
         log2FoldChange > -fc & log.padj < fdr ~ "grey40",
-      ))
+      )) 
     
     # select top 5 down and up regulated for labels
     df.up <- df %>%
@@ -67,7 +72,7 @@ volcano <- function(xlsx, outdir){
     p <- ggplot(df, aes(x = `log2FoldChange`,
                    y = `log.padj`)
            ) + 
-      theme_bw() +
+      theme_cowplot() +
       theme(axis.text=element_text(size = 16),
             axis.title=element_text(size = 16),
             plot.title = element_text(hjust = 0.5,
@@ -91,11 +96,17 @@ volcano <- function(xlsx, outdir){
                  linetype = "dashed", 
                  color = "red", 
                  linewidth = 0.5) +
-      ggtitle(contrast) +
-      geom_label_repel(size = 5,
+      ggtitle(contrast) 
+    
+    if (str_detect(xlsx,"deseq2_te")){
+      label_name <- "ensembl_gene_id"
+    } else {
+      label_name <- "external_gene_name"
+    }
+    p <- p + geom_label_repel(size = 5,
                        aes(x = `log2FoldChange`,
                            y = `log.padj`,
-                           label = external_gene_name), 
+                           label = .data[[label_name]]), 
                        data = df.label,
                        nudge_x = -0.125,
                        nudge_y = 0.05) +
