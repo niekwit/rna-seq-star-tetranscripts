@@ -8,3 +8,4 @@ dependencies:
   - trim-galore=0.6.10
   - star=2.7.10b
   - samtools=1.17
+  - pigz
