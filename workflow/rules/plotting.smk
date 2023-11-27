@@ -52,7 +52,7 @@ rule volcano_plot:
         te="results/deseq2/deseq2_te.xlsx",
     output:
         genes=report(directory("results/plots/volcano_genes/"), caption="report/volcano.rst", category="Volcano plots for genes"),
-        te=report(directory("results/plots/volcano_te/"), caption="report/volcano.rst", category="Volcano plots for TEs")),
+        te=report(directory("results/plots/volcano_te/"), caption="report/volcano.rst", category="Volcano plots for TEs"),
     params:
         fdr=config["fdr_cutoff"],
         fc=config["fc_cutoff"]
