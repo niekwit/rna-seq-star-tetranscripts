@@ -1,6 +1,6 @@
 rule get_fasta:
     output:
-        ensure(resources.fasta, sha256=resources.fasta_sha256)
+        resources.fasta,
     retries: 3
     params:
         url=resources.fasta_url,
@@ -9,12 +9,13 @@ rule get_fasta:
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz 2> {log};"
+        "gunzip -f {output}.gz 2>> {log}"
 
 
 rule get_gtf: 
     output:
-        ensure(resources.gtf, sha256=resources.gtf_sha256)
+        resources.gtf,
     retries: 3
     params:
         url=resources.gtf_url,
@@ -23,12 +24,13 @@ rule get_gtf:
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz 2> {log};"
+        "gunzip -f {output}.gz 2>> {log}"
 
 
 rule get_te_gtf:
     output:
-        ensure(resources.tegtf, sha256=resources.tegtf_sha256)
+        resources.tegtf,
     retries: 3
     params:
         url=resources.tegtf_url,
@@ -37,38 +39,28 @@ rule get_te_gtf:
     conda:
         "../envs/mapping.yml"
     shell:
-        "wget -q {params.url} -O {output}.gz && gunzip -f {output}.gz 2> {log}"
+        "wget -q {params.url} -O {output}.gz 2> {log};"
+        "gunzip -f {output}.gz 2>> {log}"
 
 
-rule combined_gtf:
+rule compress_resources:
     input:
-        gtf=resources.gtf,
-        te_gtf=resources.tegtf,
+        f=resources.fasta,
+        g=resources.gtf,
+        tg=resources.tegtf,
+        p="results/plots/pca.pdf",# dummy input to make sure this rule is executed at the end
     output:
-        temp("resources/combined.gtf"),
+        f"{resources.fasta}.gz",
+        f"{resources.gtf}.gz",
+        f"{resources.tegtf}.gz",
+    params:
+        pigz_options="",
+    threads: config["resources"]["mapping"]["cpu"]
+    resources: 
+        runtime=config["resources"]["mapping"]["time"]
+    log:
+        "logs/resources/compress_resources.log"
     conda:
         "../envs/mapping.yml"
-    log:
-        "logs/resources/combined_gtf.log"
     shell:
-        "cat {input.gtf} {input.te_gtf} > {output} 2> {log}}"
-
-
-# much quicker than reading gene names from GTF file in R
-rule get_gene_names_from_gtf:
-    input:
-        "resources/combined.gtf"
-    output:
-        "resources/all_gene_names.txt"
-    threads: 1
-    resources:
-        runtime=10
-    conda:
-        "../envs/mapping.yml"
-    log:
-        "logs/resources/get_gene_names_from_gtf.log"
-    shell:
-        """
-        grep -o -P '(?<=gene_id ")[^"]*' {input} | sort | uniq > {output} 2> {log}
-        """
-
+        "pigz -p {threads} {params.pigz_options} {input.f} {input.g} {input.tg} 2> {log}"
