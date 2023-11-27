@@ -10,38 +10,23 @@ library(stringr)
 library(biomaRt)
 library(openxlsx)
 
-# create output dir
-dir.create("deseq2", showWarnings=FALSE)
-
-#### load snakemake variables####
+# load Snakemake variables
 count.files <- snakemake@input[["counts"]]
-gtf <- snakemake@input[["gtf"]]
-all.genes.txt <- snakemake@input[["genes"]]
 genome <- snakemake@params[["genome"]]
 
-#### Load gene information####
+# Use first count file as template for count matrix
+countMatrix <- read.delim(count.files[1]) 
+names(countMatrix) <- c("index", sub(".cntTable","",basename(count.files[1])))
 
-genes <- scan(all.genes.txt, what="character")
-
-
-#### Create count matrix for DESeq2 from count files ####
-countMatrix <- data.frame(matrix(ncol=1, nrow=length(genes)))
-names(countMatrix) <- c("index")
-countMatrix$index <- genes
-rownames(countMatrix) <- countMatrix$index
-
-# add count data to countMatrix
-for (i in count.files) {
-    sample <- basename(i)
-    sample <- sub(".cntTable","",sample)
-    df <- read.delim(i)
+# add all count data to countMatrix
+for (i in seq(from=2,to=length(count.files))) {
+    sample <- sub(".cntTable","",basename(count.files[i]))
+    df <- read.delim(count.files[i])
     colnames(df) <- c("index", sample)
     
-    #get TE gene name
-    df$index <- str_split_fixed(df$index,":", n=2)[,1]
-    
-    countMatrix <- left_join(countMatrix, df, by="index")
-  
+    countMatrix <- full_join(countMatrix, 
+                             df, 
+                             by="index")
   }
 
 # remove lines with all 0s
@@ -62,16 +47,20 @@ if (length(treatments) > 1){
   samples$comb <- paste0(samples$genotype)
 }
 
+
 # create DESeq2 object
 dds <- DESeqDataSetFromMatrix(countData = countMatrix,
-                            colData = samples,
-                            design = ~ comb)
+                              colData = samples,
+                              design = ~ comb)
 
 # save DESeqDataSet to file (input for other scripts)
 save(dds, file=snakemake@output[["rdata"]])
 
 # load reference samples
 references <- unique(samples[samples$reference == "yes" ,]$comb)
+if (length(references) == 0){
+  stop("ERROR: No reference samples found. Please check your samples.csv file.")
+}
 
 # create nested lists to store all pairwise comparisons (top level:references, lower level: samples without reference)
 df.list.genes <- vector(mode="list", length=length(references))
@@ -84,21 +73,48 @@ for (i in seq_along(references)){
   df.list.te[[i]] <- vector(mode="list", length=(length(unique(samples$comb)) - 1 ))
 }
 
-# load data for gene annotation
-mart <- useMart("ensembl")
-
-if (grepl("hg",genome, fixed=TRUE)) {
-  mart <- useDataset("hsapiens_gene_ensembl", mart = mart)
-} else if (grepl("mm",genome, fixed=TRUE)){
-  mart <- useDataset("mmusculus_gene_ensembl", mart = mart)
-} # add other genomes later
-
-for (r in seq(references)){
+tryCatch({
+  # Annotate non-TE Ensembl gene IDs with biomaRt
+  genes <- row.names(countMatrix)
+  if (grepl("hg",genome, fixed=TRUE)) {
+    ensembl <- useEnsembl(biomart="genes", 
+                          dataset = "hsapiens_gene_ensembl", 
+                          mirror = "www")
+    genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl=TRUE)]
+    
+  } else if (grepl("mm",genome, fixed=TRUE)){
+    ensembl <- useEnsembl(biomart="genes", 
+                          dataset = "mmusculus_gene_ensembl", 
+                          mirror = "www")
+    genes <- genes[grepl("ENSMUSG[0-9]{11}+", genes, perl=TRUE)]
+  } # add other genomes later
   
+  # gene annotation
+  gene.info <- getBM(filters = "ensembl_gene_id", 
+                     attributes = c("ensembl_gene_id", 
+                                    "external_gene_name",
+                                    "description",
+                                    "gene_biotype", 
+                                    "chromosome_name",
+                                    "start_position",
+                                    "end_position", 
+                                    "percentage_gene_gc_content"), 
+                     values = genes,
+                     mart = ensembl)
+}, error = function(error) {
+  # biomaRt is very prone to errors, so catch errors here and print a more informative error message
+  message("bioMart error. There might be an issue with the servers. Please run Snakemake again later.")
+  message("Here's the original error message:")
+  message(conditionMessage(error))
+  }
+)
+
+# performs pair-wise comparisons for each reference sample
+for (r in seq(references)){
   # copy dds
   dds_relevel <- dds
   
-  # for each reference sample, set it as reference in dds
+  # relevel dds to reference sample
   dds_relevel$comb <- relevel(dds$comb, ref = references[r])
   
   # differential expression analysis
@@ -122,23 +138,18 @@ for (r in seq(references)){
       mutate(ensembl_gene_id = res@rownames, .before=1)
     
     # get non-TE genes
-    df.genes <- df[grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    if (grepl("hg",genome) ==TRUE) {
+      df.genes <- df[grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    } else if (grepl("mm",genome) == TRUE){
+      df.genes <- df[grepl("ENSMUSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    } # add other genomes later
     
     # get TE genes
-    df.te <- df[!grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
-    
-    # get gene annotation
-    gene.info <- getBM(filters = "ensembl_gene_id", 
-                       attributes = c("ensembl_gene_id", 
-                                      "external_gene_name",
-                                      "description",
-                                      "gene_biotype", 
-                                      "chromosome_name",
-                                      "start_position",
-                                      "end_position", 
-                                      "percentage_gene_gc_content"), 
-                       values = df.genes$ensembl_gene_id, 
-                       mart = mart)
+    if (grepl("hg",genome) ==TRUE) {
+      df.te <- df[!grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    } else if (grepl("mm",genome) == TRUE){
+      df.te <- df[!grepl("ENSMUSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    } # add other genomes later
     
     # add gene annotation to df.genes
     df.genes <- left_join(df.genes,gene.info,by="ensembl_gene_id")
@@ -190,6 +201,17 @@ names(df.list.genes) <- names.genes
 names.te <- lapply(df.list.te, function(x) unique(x$contrast_name))
 names(df.list.te) <- names.te
 
+# write each df also to separate csv file
+save2csv <- function(df.list, type){
+  for (i in seq(df.list)){
+    write.csv(df.list[[i]], 
+              paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
+              row.names = FALSE)
+  }
+}
+save2csv(df.list.genes, "_genes")
+save2csv(df.list.te, "_te")
+
 # write output to file
 write.xlsx(df.list.genes, 
            snakemake@output[["genes"]],
@@ -202,6 +224,4 @@ write.xlsx(df.list.te,
 
 sink(log, type = "output")
 sink(log, type = "message")
-
-
 
