@@ -7,6 +7,9 @@ mapping: # STAR mapping parameters
   outFilterMultimapNmax: "100"
   winAnchorMultimapNmax: "100"
   extra_params : "" # additional arguments to pass to STAR
+deeptools:
+  normalisation: RPKM
+  binsize: 10
 resources: # computing resources
   account: XXX 
   partition: cclake
