@@ -1,0 +1,37 @@
+genome: mm10
+ensembl_genome_build: "110"
+strand: reverse # check https://pypi.org/project/TEtranscripts/
+fdr_cutoff: 0.05 # cut off for volcano plots
+fc_cutoff: 0.5 # log2 fold change cut off for volcano plots
+mapping: # STAR mapping parameters
+  outFilterMultimapNmax: "100"
+  winAnchorMultimapNmax: "100"
+  extra_params : "" # additional arguments to pass to STAR
+deeptools:
+  normalisation: RPKM
+  binsize: 10
+resources: # computing resources
+  account: XXX 
+  partition: cclake
+  max_jobs: 300
+  trim:
+    cpu: 8
+    time: 60
+  fastqc:
+    cpu: 4
+    time: 60
+  mapping:
+    cpu: 10
+    time: 120
+  samtools:
+    cpu: 4
+    time: 30
+  deeptools:
+    cpu: 6
+    time: 60
+  deseq2:
+    cpu: 6
+    time: 60 
+  plotting:
+    cpu: 2
+    time: 20
