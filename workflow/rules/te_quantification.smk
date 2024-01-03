@@ -10,6 +10,8 @@ rule TE_count:
         "results/te_count/{sample}.cntTable",
     threads:
         config["resources"]["mapping"]["cpu"]
+    resources:
+        runtime=config["resources"]["mapping"]["time"]
     conda:
         "../envs/te.yml"
     log:
@@ -22,5 +24,5 @@ rule TE_count:
         "--sortByPos "
         "--project {wildcards.sample} "
         "--outdir results/te_count/ "
-        "2> {log}"
+        "> {log} 2>&1"
 

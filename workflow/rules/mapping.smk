@@ -10,20 +10,8 @@ rule get_readlength:
         "../envs/mapping.yml"
     log:
         "logs/mapping/readlength.log"
-    shell:
-        """
-        set +e
-        awk '{{print $5}}' {input} | sed 1d | sort -nr | uniq | head -1 | awk '{{print $1-1}}' | tee {output} | awk '{{if ($1 ~ /^[0-9]+$/) exit 0; else exit 1}}' 2> {log}
-        exitcode=$?
-        if [ $exitcode -eq 1 ]
-        then
-            echo "ERROR: Read length -1 is not a number!"
-            echo "Please check results/qc/multiqc_data/multiqc_general_stats.txt..."
-            exit 1
-        else 
-            exit 0
-        fi
-        """
+    script:
+        "../scripts/get_readlength.sh"
 
 
 rule star_index:
@@ -47,7 +35,7 @@ rule star_index:
         "--genomeFastaFiles {input.fa} "
         "--sjdbGTFfile {input.gtf} "
         "--sjdbOverhang $(cat {input.rl}) "
-        "2> {log}"
+        "> {log} 2>&1"
 
 
 rule mapping:
@@ -81,7 +69,8 @@ rule mapping:
         "--outSAMtype BAM SortedByCoordinate "
         "--outTmpDir temp_{wildcards.sample}/ "
         "--outFileNamePrefix results/mapped/{wildcards.sample}/{wildcards.sample} "
-        "{params.extra} 2> {log}"
+        "{params.extra} "
+        "> {log} 2>&1"
 
 
 rule index_bam:
@@ -97,6 +86,9 @@ rule index_bam:
     log:
         "logs/mapping/index_bam_{sample}.log"
     shell:
-        "samtools index -@ {threads} {input} 2> {log}"
+        "samtools index "
+        "-@ {threads} "
+        "{input} "
+        "> {log} 2>&1"
 
 
