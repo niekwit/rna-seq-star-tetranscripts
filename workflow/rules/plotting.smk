@@ -65,3 +65,23 @@ rule volcano_plot:
         "logs/plots/volcano.log"
     script:
         "../scripts/volcano.R"   
+
+
+rule plot_te_classes:
+    input:
+        "results/deseq2/deseq2_te.xlsx",
+    output:
+        report(directory("results/plots/te_classes"), caption="report/te_classes.rst", category="TE classes"),
+    params:
+        fdr=config["fdr_cutoff"],
+        lfc=config["fc_cutoff"]
+    conda:
+        "../envs/deseq2.yml"
+    threads: config["resources"]["plotting"]["cpu"]
+    resources:
+        runtime=config["resources"]["plotting"]["time"]
+    log:
+        "logs/plots/te_classes.log"
+    script:
+        "../scripts/te_classes.R"
+
