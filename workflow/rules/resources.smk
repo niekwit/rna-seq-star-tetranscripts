@@ -6,6 +6,9 @@ rule get_fasta:
         url=resources.fasta_url,
     log:
         "logs/resources/get_fasta.log"
+    threads: 1
+    resources: 
+        runtime=30
     conda:
         "../envs/mapping.yml"
     shell:
@@ -21,6 +24,9 @@ rule get_gtf:
         url=resources.gtf_url,
     log:
         "logs/resources/get_gtf.log"
+    threads: 1
+    resources: 
+        runtime=30
     conda:
         "../envs/mapping.yml"
     shell:
@@ -36,6 +42,9 @@ rule get_te_gtf:
         url=resources.tegtf_url,
     log:
         "logs/resources/get_te_gtf.log"
+    threads: 1
+    resources: 
+        runtime=30
     conda:
         "../envs/mapping.yml"
     shell:
@@ -63,4 +72,10 @@ rule compress_resources:
     conda:
         "../envs/mapping.yml"
     shell:
-        "pigz -p {threads} {params.pigz_options} {input.f} {input.g} {input.tg} 2> {log}"
+        "pigz "
+        "-p {threads} "
+        "{params.pigz_options} "
+        "{input.f} "
+        "{input.g} "
+        "{input.tg} "
+        "> {log} 2>&1"
