@@ -42,6 +42,7 @@ rule all:
         "results/plots/sample_distance.pdf",
         "results/plots/volcano_genes/",
         "results/plots/volcano_te/",
+        "results/plots/te_classes",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
 
 # save snakemake terminal output to log file
