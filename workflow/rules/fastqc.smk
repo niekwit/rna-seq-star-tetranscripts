@@ -9,13 +9,15 @@ rule fastqc:
     log:
         "logs/fastqc/{sample}{end}.log"
     threads: config["resources"]["fastqc"]["cpu"]
+    resources:
+        runtime=config["resources"]["fastqc"]["time"]
     wrapper:
         "v2.0.0/bio/fastqc"
 
 
 rule multiqc:
     input:
-        expand("results/qc/fastqc/{sample}{end}_fastqc.zip", sample=SAMPLES, end=["_R1","_R2"])
+        expand("results/qc/fastqc/{sample}{end}_fastqc.zip", sample=SAMPLES, end=["_R1_001","_R2_001"])
     output:
         "results/qc/multiqc.html",
         "results/qc/multiqc_data/multiqc_general_stats.txt"
@@ -25,6 +27,9 @@ rule multiqc:
         "logs/multiqc/multiqc.log"
     conda:
         "../envs/mapping.yml"
+    threads: config["resources"]["fastqc"]["cpu"]
+    resources:
+        runtime=config["resources"]["fastqc"]["time"]
     shell:
         "multiqc " 
         "--force "
@@ -32,4 +37,4 @@ rule multiqc:
         "-n multiqc.html "
         "{params.extra} "
         "{input} "
-        "2> {log}"
+        "> {log} 2>&1"
