@@ -1,4 +1,4 @@
-genome: mm10
+genome: mm39
 ensembl_genome_build: "110"
 strand: reverse # check https://pypi.org/project/TEtranscripts/
 fdr_cutoff: 0.05 # cut off for volcano plots
@@ -11,9 +11,6 @@ deeptools:
   normalisation: RPKM
   binsize: 10
 resources: # computing resources
-  account: XXX 
-  partition: cclake
-  max_jobs: 300
   trim:
     cpu: 8
     time: 60

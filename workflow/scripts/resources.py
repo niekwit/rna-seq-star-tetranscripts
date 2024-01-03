@@ -20,6 +20,8 @@ class Resources:
                 name = "GRCh37"
             elif genome == "hg38":
                 name = "GRCh38"
+            else:
+                raise ValueError(f"Genome {genome} not found")
                 
             # create URLs for genome files
             self.fasta_url = f"{base_url_ens}fasta/homo_sapiens/dna/Homo_sapiens.{name}.dna.primary_assembly.fa.gz"
@@ -27,15 +29,20 @@ class Resources:
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
                                   
         elif "mm" in genome:
-            if genome == "mm9":
+            if genome == "mm38":
                 name = "GRCm38"
-            elif genome == "mm10":
+            elif genome == "mm39":
                 name = "GRCm39"
+            else:
+                raise ValueError(f"Genome {genome} not found")
                 
             # create URLs for genome files
             self.fasta_url = f"{base_url_ens}fasta/mus_musculus/dna/Mus_musculus.{name}.dna.primary_assembly.fa.gz"
             self.gtf_url = f"{base_url_ens}gtf/mus_musculus/Mus_musculus.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
+        
+        else:
+            raise ValueError(f"Genome {genome} not found/available")
                         
         # downloaded unzipped file names
         self.fasta = self._file_from_url(self.fasta_url)
