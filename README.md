@@ -1,8 +1,8 @@
-# Snakemake workflow: `rna-seq-star-tetranscripts`
-
 [![Snakemake](https://img.shields.io/badge/snakemake-≥6.3.0-brightgreen.svg)](https://snakemake.github.io)
-[![GitHub actions status](https://github.com/niekwit/rna-seq-star-tetranscripts/workflows/Tests/badge.svg?branch=main)](https://github.com/niekwit/rna-seq-star-tetranscripts/actions?query=branch%3Amain+workflow%3ATests)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10211476.svg)](https://doi.org/10.5281/zenodo.10211476)
+[![Tests](https://github.com/niekwit/rna-seq-star-tetranscripts/actions/workflows/main.yml/badge.svg)](https://github.com/niekwit/rna-seq-star-tetranscripts/actions/workflows/main.yml)
 
+# Snakemake workflow: `rna-seq-star-tetranscripts`
 
 A Snakemake workflow for transposable element RNA-Seq using [TEtranscripts](https://hammelllab.labsites.cshl.edu/software/#TEtranscripts).
 
@@ -18,11 +18,13 @@ Given that Mamba is installed, run
 ```
 mamba create -c conda-forge -c bioconda --name snakemake snakemake snakedeploy
 ```
+
 to install both Snakemake and Snakedeploy in an isolated environment. For all following commands ensure that this environment is activated via
 
 ```
 conda activate snakemake
 ```
+
 ### Deploy workflow
 
 Given that Snakemake and Snakedeploy are installed and available (first step), the workflow can be deployed as follows.

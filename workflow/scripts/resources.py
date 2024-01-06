@@ -27,7 +27,7 @@ class Resources:
             self.fasta_url = f"{base_url_ens}fasta/homo_sapiens/dna/Homo_sapiens.{name}.dna.primary_assembly.fa.gz"
             self.gtf_url = f"{base_url_ens}gtf/homo_sapiens/Homo_sapiens.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
-                                  
+        
         elif "mm" in genome:
             if genome == "mm38":
                 name = "GRCm38"
@@ -41,6 +41,12 @@ class Resources:
             self.gtf_url = f"{base_url_ens}gtf/mus_musculus/Mus_musculus.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
         
+        elif genome == "test":
+            # Download fasta for only one chromosome            
+            self.fasta_url = "https://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz"
+            self.gtf_url = f"{base_url_ens}gtf/homo_sapiens/Homo_sapiens.GRCh38.{build}.gtf.gz"
+            self.tegtf_url = f"{base_url_te}GRCh38_Ensembl_rmsk_TE.gtf.gz"
+            
         else:
             raise ValueError(f"Genome {genome} not found/available")
                         
@@ -55,7 +61,10 @@ class Resources:
         
         return f"resources/{os.path.basename(url).replace('.gz','')}"
     
-    
+    def _return_urls(self, name, build):
+        """Returns URLs for fasta and GTF files
+        """
+        pass
   
         
         
