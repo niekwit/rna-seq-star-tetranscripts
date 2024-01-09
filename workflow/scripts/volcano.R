@@ -46,7 +46,7 @@ volcano <- function(xlsx, outdir){
     df <- df %>%
       mutate(colour = case_when(
         log2FoldChange > fc & log.padj > fdr ~ "red",
-        log2FoldChange < -fc & log.padj > fdr ~ "blue",
+        log2FoldChange < -fc & log.padj > fdr ~ "navy",
         log2FoldChange < fc & log.padj < fdr ~ "grey40",
         log2FoldChange > -fc & log.padj < fdr ~ "grey40",
       )) 
