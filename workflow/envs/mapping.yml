@@ -4,8 +4,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - multiqc=1.15
-  - trim-galore=0.6.10
-  - star=2.7.10b
-  - samtools=1.17
-  - pigz
+  - star=2.7.11a
+  - pigz=2.8
+  - multiqc=1.19
