@@ -1,7 +1,7 @@
 rule bam_to_bigwig:
     input:
         bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
-        idx="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
+        bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
     output:
         "results/bigwig/{sample}.bw",
     params:
