@@ -10,31 +10,34 @@ rule fastqc:
         "logs/fastqc/{sample}{end}.log"
     threads: config["resources"]["fastqc"]["cpu"]
     resources:
-        runtime=config["resources"]["fastqc"]["time"]
+        runtime=config["resources"]["fastqc"]["time"],
+        mem_mb = 1024
     wrapper:
-        "v2.0.0/bio/fastqc"
+        "v3.3.3/bio/fastqc"
 
 
-rule multiqc:
+rule multiqc: 
     input:
         expand("results/qc/fastqc/{sample}{end}_fastqc.zip", sample=SAMPLES, end=["_R1_001","_R2_001"])
     output:
-        "results/qc/multiqc.html",
-        "results/qc/multiqc_data/multiqc_general_stats.txt"
+        r="results/qc/multiqc/multiqc.html",
+        d=directory("results/qc/multiqc/"),
+        t="results/qc/multiqc/multiqc_data/multiqc_general_stats.txt",
     params:
         extra="",  # Optional: extra parameters for multiqc
     log:
         "logs/multiqc/multiqc.log"
-    conda:
-        "../envs/mapping.yml"
     threads: config["resources"]["fastqc"]["cpu"]
     resources:
         runtime=config["resources"]["fastqc"]["time"]
+    conda:
+        "../envs/mapping.yml"
     shell:
         "multiqc " 
         "--force "
-        "-o results/qc "
+        "--outdir {output.d} "
         "-n multiqc.html "
         "{params.extra} "
         "{input} "
         "> {log} 2>&1"
+        
