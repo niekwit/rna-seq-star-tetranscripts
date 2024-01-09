@@ -1,7 +1,6 @@
-import os
 import datetime
 from scripts.resources import Resources
-from scripts import general_functions as gf
+from scripts import general_functions as utils
 from snakemake.utils import min_version
 
 # set minimum snakemake version
@@ -14,13 +13,7 @@ configfile: "config/config.yaml"
 resources = Resources(config["genome"], config["ensembl_genome_build"])
 
 # get sample names
-SAMPLES = gf.import_samples()
-
-# set STAR parameters
-ofmn = config["mapping"]["outFilterMultimapNmax"]
-wamn = config["mapping"]["winAnchorMultimapNmax"]
-extra_params = config["mapping"]["extra_params"]
-star_extra = f"--outFilterMultimapNmax {ofmn} --winAnchorMultimapNmax {wamn} {extra_params}" 
+SAMPLES = utils.import_samples()
 
 # import rules
 include: "rules/fastqc.smk"
@@ -36,13 +29,11 @@ include: "rules/bigwig.smk"
 rule all:
     input: 
         "results/plots/mapping_rates.pdf",
-        f"{resources.fasta}.gz",
-        f"{resources.gtf}.gz",
-        f"{resources.tegtf}.gz",
         "results/plots/sample_distance.pdf",
         "results/plots/volcano_genes/",
         "results/plots/volcano_te/",
         "results/plots/te_classes",
+        "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
 
 # save snakemake terminal output to log file
