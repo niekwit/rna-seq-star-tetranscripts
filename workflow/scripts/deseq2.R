@@ -47,11 +47,39 @@ if (length(treatments) > 1){
   samples$comb <- paste0(samples$genotype)
 }
 
+# check if batch column exists
+if ("batch" %in% colnames(samples)){
+  batches <- unique(samples$batch)
+  if (length(batches) == 1){
+    batches <- 1
+  }
+} else {
+  batches <- 1
+}
+
+# check if any samples have been omitted from samples.csv and remove from count.files
+# this allows for a re-run of DESeq2 without having to re-run the entire pipeline
+all_samples <- samples$sample
+
+if (length((all_samples)) != length(count.files)){
+  omitted <- count.files[!(basename(gsub(pattern = "\\.cntTable", "", count.files)) %in% all_samples)]
+  print("WARNING: Some samples have been omitted from samples.csv. Resuming without these samples:")
+  for (i in seq(omitted)){
+    print(basename(gsub(pattern = "\\.cntTable", "", omitted[i])))
+   }
+  count.files <- count.files[basename(gsub(pattern = "\\.cntTable$", "", count.files)) %in% all_samples]
+}
 
 # create DESeq2 object
-dds <- DESeqDataSetFromMatrix(countData = countMatrix,
+if (batches == 1){
+  dds <- DESeqDataSetFromMatrix(countData = countMatrix,
                               colData = samples,
-                              design = ~ comb)
+                              design = ~comb)
+} else {
+  dds <- DESeqDataSetFromMatrix(countData = countMatrix,
+                              colData = samples,
+                              design = ~batch + comb)
+}
 
 # save DESeqDataSet to file (input for other scripts)
 save(dds, file=snakemake@output[["rdata"]])
