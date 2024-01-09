@@ -1,4 +1,4 @@
-genome: mm10
+genome: test
 ensembl_genome_build: "110"
 strand: reverse # check https://pypi.org/project/TEtranscripts/
 fdr_cutoff: 0.05 # cut off for volcano plots
@@ -9,7 +9,7 @@ mapping: # STAR mapping parameters
   extra_params : "" # additional arguments to pass to STAR
 deeptools:
   normalisation: RPKM
-  binsize: 10
+  binsize: 1000
 resources: # computing resources
   account: XXX 
   partition: cclake
