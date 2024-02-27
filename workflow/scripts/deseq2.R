@@ -145,7 +145,8 @@ for (r in seq(references)){
     } else if (grepl("mm",genome) == TRUE){
       df.genes <- df[grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (genome == "test") {
-      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
+      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),]
+    }
     print(9)
     # Get TE genes
     if (grepl("hg",genome) == TRUE) {
