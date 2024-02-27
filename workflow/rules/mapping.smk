@@ -36,7 +36,7 @@ rule star_index:
         "sjdbList.fromGTF.out.tab",
         "sjdbList.out.tab",
         "transcriptInfo.tab"),
-    cache: True
+    #cache: True
     params:
         sjdbOverhang="$(cat results/qc/readlength.txt)",
         extra="",
