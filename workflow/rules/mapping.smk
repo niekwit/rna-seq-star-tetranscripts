@@ -17,7 +17,8 @@ rule star_index:
         gtf=resources.gtf,
         rl="results/qc/readlength.txt",
     output:
-        temp(directory(f"resources/index_star/")),
+        directory(f"resources/{resources.genome}_{resources.build}_index_star/"),
+    cache: True
     params:
         sjdbOverhang="$(cat results/qc/readlength.txt)"
     threads: config["resources"]["mapping"]["cpu"]
@@ -33,7 +34,7 @@ rule mapping: #change to wrapper later?
     input:
         val1="results/trimmed/{sample}_val_1.fq.gz",
         val2="results/trimmed/{sample}_val_2.fq.gz",
-        idx=f"resources/index_star/",
+        idx=f"resources/{resources.genome}_{resources.build}_index_star/",
     output:
         "results/mapped/{sample}/{sample}Log.final.out",
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
