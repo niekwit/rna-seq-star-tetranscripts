@@ -84,18 +84,18 @@ save(dds, file=snakemake@output[["rdata"]])
 
 # Load reference samples
 references <- unique(samples[samples$reference == "yes" ,]$comb)
-if (length(references) == 0){
+if (length(references) == 0) {
   stop("ERROR: No reference samples found. Please check your samples.csv file.")
 }
 
 # Create nested lists to store all pairwise comparisons (top level:references, lower level: samples without reference)
 df.list.genes <- vector(mode="list", length = length(references))
-for (i in seq_along(references)){
+for (i in seq_along(references)) {
   df.list.genes[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
 }
 
 df.list.te <- vector(mode="list", length = length(references))
-for (i in seq_along(references)){
+for (i in seq_along(references)) {
   df.list.te[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
 }
 
@@ -111,35 +111,34 @@ if (grepl("hg", genome, fixed = TRUE)) {
 
 # Get gene annotation
 load(snakemake@input[["edb"]])
-
+print(1)
 # Performs pair-wise comparisons for each reference sample
 for (r in seq(references)){
   # Copy dds
   dds_relevel <- dds
-  
+  print(2)
   # Relevel dds to reference sample
   dds_relevel$comb <- relevel(dds$comb, ref = references[r])
-  
+  print(3)
   # Differential expression analysis
   dds_relevel <- DESeq(dds_relevel)
-  
+  print(4)
   # Get all pairwise comparisons
   comparisons <- resultsNames(dds_relevel)
   comparisons <- strsplit(comparisons, " ")
   comparisons[1] <- NULL
-  
+  print(5)
   # Create df for each comparison
   for (c in seq(comparisons)){
-    
     # Get name of comparison
     comparison <- comparisons[[c]]
     comparison <- str_replace(comparison, "comb_", "") 
-    
+    print(6)
     res <- results(dds_relevel, name=comparisons[[c]])
-    
+    print(7)
     df <- as.data.frame(res) %>%
       mutate(ensembl_gene_id = res@rownames, .before = 1)
-    
+    print(8)
     # Get non-TE genes
     if (grepl("hg",genome) ==TRUE) {
       df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
@@ -147,7 +146,7 @@ for (r in seq(references)){
       df.genes <- df[grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (genome == "test") {
       df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
-    
+    print(9)
     # Get TE genes
     if (grepl("hg",genome) == TRUE) {
       df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
@@ -156,32 +155,32 @@ for (r in seq(references)){
     } else if (genome == "test") {
       df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     }
-    
+    print(10)
     # Add gene annotation to df.genes
     df.genes <- left_join(df.genes,gene.info, by = "ensembl_gene_id")
-    
+    print(11)
     # Get normalised read counts for each sample  
     temp <- as.data.frame(counts(dds_relevel, normalized = TRUE))
     temp$ensembl_gene_id <- row.names(temp)
     temp$ensembl_gene_id <- gsub("\\.[0-9]*", "", temp$ensembl_gene_id) #tidy up gene IDs
     names(temp)[1:length(dds_relevel@colData@listData$sample)] <- dds_relevel@colData@listData$sample
-    
+    print(12)
     # Add normalised read counts to df.genes
     df.genes <- left_join(df.genes,temp, by = "ensembl_gene_id")
     df.genes <- df.genes %>%
       mutate(contrast_name = comparison, .before = 1)
-    
+    print(13)
     # Add df.genes to df.list.genes
     df.list.genes[[r]][[c]] <- df.genes
-    
+    print(14)
     # Add normalised read counts to df.te
     df.te <- left_join(df.te,temp, by = "ensembl_gene_id")
     df.te <- df.te %>%
       mutate(contrast_name = comparison, .before = 1)
-    
+    print(15)
     # Add df.te to df.list.te
     df.list.te[[r]][[c]] <- df.te
-    
+    print(16)
   }
 }
 
@@ -195,18 +194,18 @@ flattenlist <- function(x){
     return(out)
   }
 }
-
+print(17)
 # Flatten lists
 df.list.genes <- flattenlist(df.list.genes)
 df.list.te <- flattenlist(df.list.te)
-
+print(18)
 # Get contrast names from each df in list
 names.genes <- lapply(df.list.genes, function(x) unique(x$contrast_name))
 names(df.list.genes) <- names.genes
-
+print(19)
 names.te <- lapply(df.list.te, function(x) unique(x$contrast_name))
 names(df.list.te) <- names.te
-
+print(20)
 # Write each df also to separate csv file
 save2csv <- function(df.list, type){
   for (i in seq(df.list)){
@@ -217,15 +216,15 @@ save2csv <- function(df.list, type){
 }
 save2csv(df.list.genes, "_genes")
 save2csv(df.list.te, "_te")
-
+print(21)
 # Write output to file
 write.xlsx(df.list.genes, 
            snakemake@output[["genes"]],
            colNames = TRUE)
-
+print(22)
 write.xlsx(df.list.te,
            snakemake@output[["te"]],
            colNames = TRUE)
-
+print(23)
 sink(log, type = "output")
 sink(log, type = "message")
