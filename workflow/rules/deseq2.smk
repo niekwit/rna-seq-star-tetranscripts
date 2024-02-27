@@ -1,12 +1,26 @@
+rule create_annotation_db:
+    input:
+        gtf=resources.gtf,
+    output:
+        edb="resources/edb.RData"
+    conda:
+        "../envs/rtracklayer.yml"
+    threads: config["resources"]["deseq2"]["cpu"]
+    resources:
+        runtime=config["resources"]["deseq2"]["time"]
+    log:
+        "logs/rtracklayer/create_annotation_db.log"
+    script:
+        "../scripts/create_annotation_db.R"
+
 rule deseq2:
     input:
         counts=expand("results/te_count/{sample}.cntTable", sample=SAMPLES),
-        gtf=resources.gtf,
+        edb="resources/edb.RData",
     output:
         genes=report("results/deseq2/deseq2_genes.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of genes"),
         te=report("results/deseq2/deseq2_te.xlsx", caption="report/deseq2.rst", category="Differential Expression Analysis of TEs"),
         rdata="results/deseq2/dds.RData",
-    retries: 5 # gene annotation may fail due to database failed connection
     params:
         strand=config["strand"],
         genome=resources.genome

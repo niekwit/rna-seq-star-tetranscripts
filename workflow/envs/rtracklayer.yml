@@ -1,0 +1,9 @@
+name: deseq2
+channels: 
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.2
+  - bioconductor-rtracklayer=1.62.0
+  

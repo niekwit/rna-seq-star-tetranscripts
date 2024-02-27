@@ -6,13 +6,11 @@ sink(log, type = "message")
 library(DESeq2)
 library(dplyr)
 library(stringr)
-library(rtracklayer)
 library(openxlsx)
 
 # Load Snakemake variables
 count.files <- snakemake@input[["counts"]]
 genome <- snakemake@params[["genome"]]
-gtf <- snakemake@input[["gtf"]]
 
 # Use first count file as template for count matrix
 countMatrix <- read.delim(count.files[1]) 
@@ -111,11 +109,8 @@ if (grepl("hg", genome, fixed = TRUE)) {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
 }
 
-# Gene annotation info
-db <- rtracklayer::import(gtf)
-gene.info <- data.frame(ensembl_gene_id = db$gene_id, 
-                  external_gene_name = db$gene_name, 
-                  gene_biotype = db$gene_biotype)
+# Get gene annotation
+load(snakemake@input[["edb"]])
 
 # Performs pair-wise comparisons for each reference sample
 for (r in seq(references)){
