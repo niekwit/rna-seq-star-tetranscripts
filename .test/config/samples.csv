@@ -1,5 +1,5 @@
-sample,genotype,treatment,reference, batch
-control_1,control,None,yes,1
-control_2,control,None,yes,1
-treatment_1,treatment,None,no,1
-treatment_2,treatment,None,no,1
+sample,genotype,treatment,reference
+Control_1,WT,Normoxia,yes
+Control_2,WT,Normoxia,yes
+Control_Hypoxia_1,WT,Hypoxia,no
+Control_Hypoxia_2,WT,Hypoxia,no

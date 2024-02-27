@@ -6,50 +6,31 @@ rule get_fasta:
         url=resources.fasta_url,
     log:
         "logs/resources/get_fasta.log"
-    threads: 1
+    threads: config["resources"]["samtools"]["cpu"]
     resources: 
-        runtime=30
+        runtime=config["resources"]["samtools"]["time"]
     conda:
-        "../envs/mapping.yml"
-    shell:
-        "wget -q {params.url} -O {output}.gz 2> {log};"
-        "gunzip -f {output}.gz 2>> {log}"
+        "../envs/mapping.yaml"
+    script:
+        "../scripts/get_resource.sh"
 
 
-rule get_gtf: 
-    output:
-        resources.gtf,
-    retries: 3
-    params:
-        url=resources.gtf_url,
-    log:
-        "logs/resources/get_gtf.log"
-    threads: 1
-    resources: 
-        runtime=30
-    conda:
-        "../envs/mapping.yml"
-    shell:
-        "wget -q {params.url} -O {output}.gz 2> {log};"
-        "gunzip -f {output}.gz 2>> {log}"
+use rule get_fasta as get_gtf with:
+        output:
+            resources.gtf,
+        params:
+            url=resources.gtf_url,
+        log:
+            "logs/resources/get_gtf.log"
 
 
-rule get_te_gtf:
-    output:
-        resources.tegtf,
-    retries: 3
-    params:
-        url=resources.tegtf_url,
-    log:
-        "logs/resources/get_te_gtf.log"
-    threads: 1
-    resources: 
-        runtime=30
-    conda:
-        "../envs/mapping.yml"
-    shell:
-        "wget -q {params.url} -O {output}.gz 2> {log};"
-        "gunzip -f {output}.gz 2>> {log}"
+use rule get_fasta as get_te_gtf with:
+        output:
+            resources.tegtf,
+        params:
+            url=resources.tegtf_url,
+        log:
+            "logs/resources/get_te_gtf.log"
 
 
 rule compress_resources:
@@ -79,3 +60,4 @@ rule compress_resources:
         "{input.g} "
         "{input.tg} "
         "> {log} 2>&1"
+        
