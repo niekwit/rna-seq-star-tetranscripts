@@ -43,6 +43,8 @@ rule star_index:
     threads: config["resources"]["mapping"]["cpu"]
     resources:
         runtime=config["resources"]["mapping"]["time"]
+    conda:
+        "../envs/mapping.yml"
     log:
         "logs/index/star.log"
     shell:
