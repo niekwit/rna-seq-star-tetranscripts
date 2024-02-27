@@ -20,6 +20,4 @@ dependencies:
   - bioconductor-genomicfeatures=1.50.2
   - bioconductor-tximport=1.26.0
   - r-ggfortify=0.4.16
-  - r-reshape2=1.4.4
-  - bioconductor-rtracklayer=1.50.0
-  
+  - r-reshape2=1.4.4  
