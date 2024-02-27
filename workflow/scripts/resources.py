@@ -44,7 +44,7 @@ class Resources:
         elif genome == "test":
             # Download fasta for only one chromosome            
             self.fasta_url = "https://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz"
-            self.gtf_url = "https://github.com/niekwit/rna-seq-star-tetranscripts/raw/main/.test/Homo_sapiens.GRCh38.111_chr22gtf.gz"
+            self.gtf_url = "https://github.com/niekwit/rna-seq-star-tetranscripts/raw/main/.test/Homo_sapiens.GRCh38.111_chr22.gtf.gz"
             self.tegtf_url = "https://github.com/niekwit/rna-seq-star-tetranscripts/raw/main/.test/GRCh38_Ensembl_rmsk_TE_chr22.gtf.gz"
             
         else:
