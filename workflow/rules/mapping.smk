@@ -63,7 +63,8 @@ rule mapping:
     input:
         val1="results/trimmed/{sample}_val_1.fq.gz",
         val2="results/trimmed/{sample}_val_2.fq.gz",
-        files=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
+        idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+        idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
         "chrNameLength.txt", 
         "chrName.txt", 
         "chrStart.txt", 
