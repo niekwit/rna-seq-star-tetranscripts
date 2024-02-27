@@ -7,7 +7,7 @@
 
 set +e
 
-awk '{print $5}' ${snakemake_input[0]} | sed 1d | sort -nr | uniq | head -1 | awk '{print $1-1}' | cut -d. -f1 | tee ${snakemake_output[0]} | awk '{if ($1 ~ /^[0-9]+$/) exit 0; else exit 1}' 2> ${snakemake_log[0]}
+awk '{print $5}' ${snakemake_input["t"]} | sed 1d | sort -nr | uniq | head -1 | awk '{print $1-1}' | cut -d. -f1 | tee ${snakemake_output[0]} | awk '{if ($1 ~ /^[0-9]+$/) exit 0; else exit 1}' 2> ${snakemake_log[0]}
 
 exitcode=$?
 
