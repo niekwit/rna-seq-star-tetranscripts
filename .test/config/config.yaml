@@ -11,9 +11,6 @@ deeptools:
   normalisation: RPKM
   binsize: 1000
 resources: # computing resources
-  account: XXX 
-  partition: cclake
-  max_jobs: 300
   trim:
     cpu: 8
     time: 60

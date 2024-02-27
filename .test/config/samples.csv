@@ -1,7 +1,5 @@
-sample,genotype,treatment,reference
-WT_1,WT,None,yes
-WT_2,WT,None,yes
-WT_3,WT,None,yes
-KO_1,KO,None,no
-KO_2,KO,None,no
-KO_3,KO,None,no
+sample,genotype,treatment,reference, batch
+control_1,control,None,yes,1
+control_2,control,None,yes,1
+treatment_1,treatment,None,no,1
+treatment_2,treatment,None,no,1
