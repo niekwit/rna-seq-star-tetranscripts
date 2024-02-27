@@ -1,7 +1,7 @@
 rule get_readlength:  
     input:
         r="results/qc/multiqc/multiqc.html",
-        d=directory("results/qc/multiqc/"),
+        d="results/qc/multiqc/",
         t="results/qc/multiqc/multiqc_data/multiqc_general_stats.txt",
     output:
         "results/qc/readlength.txt",
