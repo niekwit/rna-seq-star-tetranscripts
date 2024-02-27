@@ -6,12 +6,13 @@ sink(log, type = "message")
 library(DESeq2)
 library(dplyr)
 library(stringr)
-library(biomaRt)
+library(rtracklayer)
 library(openxlsx)
 
 # Load Snakemake variables
 count.files <- snakemake@input[["counts"]]
 genome <- snakemake@params[["genome"]]
+gtf <- snakemake@input[["gtf"]]
 
 # Use first count file as template for count matrix
 countMatrix <- read.delim(count.files[1]) 
@@ -90,49 +91,31 @@ if (length(references) == 0){
 }
 
 # Create nested lists to store all pairwise comparisons (top level:references, lower level: samples without reference)
-df.list.genes <- vector(mode="list", length=length(references))
+df.list.genes <- vector(mode="list", length = length(references))
 for (i in seq_along(references)){
-  df.list.genes[[i]] <- vector(mode="list", length=(length(unique(samples$comb)) - 1 ))
+  df.list.genes[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
 }
 
-df.list.te <- vector(mode="list", length=length(references))
+df.list.te <- vector(mode="list", length = length(references))
 for (i in seq_along(references)){
-  df.list.te[[i]] <- vector(mode="list", length=(length(unique(samples$comb)) - 1 ))
+  df.list.te[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
 }
 
-# Annotate non-TE Ensembl gene IDs with biomaRt
+# Get gene IDs
 genes <- row.names(countMatrix)
-if (grepl("hg", genome, fixed=TRUE)) {
-  ensembl <- useEnsembl(biomart="genes", 
-                        dataset = "hsapiens_gene_ensembl", 
-                        mirror = "www")
-  genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl=TRUE)]
-  
+if (grepl("hg", genome, fixed = TRUE)) {
+  genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
 } else if (grepl("mm", genome, fixed=TRUE)){
-  ensembl <- useEnsembl(biomart="genes", 
-                        dataset = "mmusculus_gene_ensembl", 
-                        mirror = "www")
-  genes <- genes[grepl("ENSMUSG[0-9]{11}+", genes, perl=TRUE)]
+  genes <- genes[grepl("ENSMUSG[0-9]{11}+", genes, perl = TRUE)]
 } else if (genome == "test") {
-  ensembl <- useEnsembl(biomart="genes", 
-                        dataset = "hsapiens_gene_ensembl", 
-                        mirror = "www")
-  genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl=TRUE)]
+  genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
 }
 
-# Gene annotation
-gene.info <- getBM(filters = "ensembl_gene_id", 
-                    attributes = c("ensembl_gene_id", 
-                                  "external_gene_name",
-                                  "description",
-                                  "gene_biotype", 
-                                  "chromosome_name",
-                                  "start_position",
-                                  "end_position", 
-                                  "percentage_gene_gc_content"), 
-                    values = genes,
-                    mart = ensembl)
-
+# Gene annotation info
+db <- rtracklayer::import(gtf)
+gene.info <- data.frame(ensembl_gene_id = db$gene_id, 
+                  external_gene_name = db$gene_name, 
+                  gene_biotype = db$gene_biotype)
 
 # Performs pair-wise comparisons for each reference sample
 for (r in seq(references)){
@@ -147,7 +130,7 @@ for (r in seq(references)){
   
   # Get all pairwise comparisons
   comparisons <- resultsNames(dds_relevel)
-  comparisons <- strsplit(comparisons," ")
+  comparisons <- strsplit(comparisons, " ")
   comparisons[1] <- NULL
   
   # Create df for each comparison
@@ -155,51 +138,51 @@ for (r in seq(references)){
     
     # Get name of comparison
     comparison <- comparisons[[c]]
-    comparison <- str_replace(comparison,"comb_","") 
+    comparison <- str_replace(comparison, "comb_", "") 
     
     res <- results(dds_relevel, name=comparisons[[c]])
     
     df <- as.data.frame(res) %>%
-      mutate(ensembl_gene_id = res@rownames, .before=1)
+      mutate(ensembl_gene_id = res@rownames, .before = 1)
     
     # Get non-TE genes
     if (grepl("hg",genome) ==TRUE) {
-      df.genes <- df[grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (grepl("mm",genome) == TRUE){
-      df.genes <- df[grepl("ENSMUSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+      df.genes <- df[grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (genome == "test") {
-      df.genes <- df[grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     
     # Get TE genes
-    if (grepl("hg",genome) ==TRUE) {
-      df.te <- df[!grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+    if (grepl("hg",genome) == TRUE) {
+      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (grepl("mm",genome) == TRUE){
-      df.te <- df[!grepl("ENSMUSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+      df.te <- df[!grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     } else if (genome == "test") {
-      df.te <- df[!grepl("ENSG[0-9]{11}+",df$ensembl_gene_id, perl=TRUE),] 
+      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
     }
     
     # Add gene annotation to df.genes
-    df.genes <- left_join(df.genes,gene.info,by="ensembl_gene_id")
+    df.genes <- left_join(df.genes,gene.info, by = "ensembl_gene_id")
     
     # Get normalised read counts for each sample  
-    temp <- as.data.frame(counts(dds_relevel, normalized=TRUE))
+    temp <- as.data.frame(counts(dds_relevel, normalized = TRUE))
     temp$ensembl_gene_id <- row.names(temp)
-    temp$ensembl_gene_id <- gsub("\\.[0-9]*","",temp$ensembl_gene_id) #tidy up gene IDs
+    temp$ensembl_gene_id <- gsub("\\.[0-9]*", "", temp$ensembl_gene_id) #tidy up gene IDs
     names(temp)[1:length(dds_relevel@colData@listData$sample)] <- dds_relevel@colData@listData$sample
     
     # Add normalised read counts to df.genes
-    df.genes <- left_join(df.genes,temp,by="ensembl_gene_id")
+    df.genes <- left_join(df.genes,temp, by = "ensembl_gene_id")
     df.genes <- df.genes %>%
-      mutate(contrast_name = comparison, .before=1)
+      mutate(contrast_name = comparison, .before = 1)
     
     # Add df.genes to df.list.genes
     df.list.genes[[r]][[c]] <- df.genes
     
     # Add normalised read counts to df.te
-    df.te <- left_join(df.te,temp,by="ensembl_gene_id")
+    df.te <- left_join(df.te,temp, by = "ensembl_gene_id")
     df.te <- df.te %>%
-      mutate(contrast_name = comparison, .before=1)
+      mutate(contrast_name = comparison, .before = 1)
     
     # Add df.te to df.list.te
     df.list.te[[r]][[c]] <- df.te
@@ -209,8 +192,8 @@ for (r in seq(references)){
 
 # Function to flatten nested lists (https://stackoverflow.com/questions/16300344/how-to-flatten-a-list-of-lists/41882883#41882883)
 flattenlist <- function(x){  
-  morelists <- sapply(x, function(xprime) class(xprime)[1]=="list")
-  out <- c(x[!morelists], unlist(x[morelists], recursive=FALSE))
+  morelists <- sapply(x, function(xprime) class(xprime)[1] == "list")
+  out <- c(x[!morelists], unlist(x[morelists], recursive = FALSE))
   if(sum(morelists)){ 
     Recall(out)
   }else{
