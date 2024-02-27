@@ -10,7 +10,7 @@ rule get_fasta:
     resources: 
         runtime=config["resources"]["samtools"]["time"]
     conda:
-        "../envs/mapping.yaml"
+        "../envs/mapping.yml"
     script:
         "../scripts/get_resource.sh"
 
