@@ -1,6 +1,8 @@
 rule get_readlength:  
     input:
-        "results/qc/multiqc/multiqc_data/multiqc_general_stats.txt"
+        r="results/qc/multiqc/multiqc.html",
+        d=directory("results/qc/multiqc/"),
+        t="results/qc/multiqc/multiqc_data/multiqc_general_stats.txt",
     output:
         "results/qc/readlength.txt",
     conda:
@@ -17,24 +19,64 @@ rule star_index:
         gtf=resources.gtf,
         rl="results/qc/readlength.txt",
     output:
-        directory(f"resources/{resources.genome}_{resources.build}_index_star/"),
+        directory=directory(f"resources/{resources.genome}_{resources.build}_index_star/"),
+        files=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
+        "chrNameLength.txt", 
+        "chrName.txt", 
+        "chrStart.txt", 
+        "exonGeTrInfo.tab", 
+        "exonInfo.tab",
+        "geneInfo.tab",
+        "Genome",
+        "genomeParameters.txt",
+        "Log.out",
+        "SA",
+        "SAindex",
+        "sjdbInfo.txt",
+        "sjdbList.fromGTF.out.tab",
+        "sjdbList.out.tab",
+        "transcriptInfo.tab"),
     cache: True
     params:
-        sjdbOverhang="$(cat results/qc/readlength.txt)"
+        sjdbOverhang="$(cat results/qc/readlength.txt)",
+        extra="",
     threads: config["resources"]["mapping"]["cpu"]
     resources:
         runtime=config["resources"]["mapping"]["time"]
     log:
         "logs/index/star.log"
-    wrapper:
-        "v3.3.3/bio/star/index"
+    shell:
+        "STAR "
+        "--runThreadN {threads} "  # Number of threads
+        "--runMode genomeGenerate "  # Indexation mode
+        "--genomeFastaFiles {input.fasta} "  # Path to fasta files
+        "--sjdbOverhang {params.sjdbOverhang} "  # Read-len - 1
+        "--sjdbGTFfile {input.gtf} "
+        "{params.extra} "  # Optional parameters
+        "--genomeDir {output.directory} "  # Path to output
+        "> {log} 2>&1"  # Logging
 
 
-rule mapping: #change to wrapper later?
+rule mapping: 
     input:
         val1="results/trimmed/{sample}_val_1.fq.gz",
         val2="results/trimmed/{sample}_val_2.fq.gz",
-        idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+        files=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
+        "chrNameLength.txt", 
+        "chrName.txt", 
+        "chrStart.txt", 
+        "exonGeTrInfo.tab", 
+        "exonInfo.tab",
+        "geneInfo.tab",
+        "Genome",
+        "genomeParameters.txt",
+        "Log.out",
+        "SA",
+        "SAindex",
+        "sjdbInfo.txt",
+        "sjdbList.fromGTF.out.tab",
+        "sjdbList.out.tab",
+        "transcriptInfo.tab"),
     output:
         "results/mapped/{sample}/{sample}Log.final.out",
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
