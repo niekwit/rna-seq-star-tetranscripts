@@ -25,11 +25,8 @@ for (file in files) {
   # read in data
   data <- read.csv(file)
   
-  # Extract sample name
-  sample <- data %>%
-    dplyr::select(contrast_name) %>%
-    unique() %>%
-    pull()
+  # Extract comparison name from file name
+  sample <- str_replace(dirname(file), ".csv", "")
   
   # Annotate data with TE class
   data <- data %>%
@@ -77,7 +74,7 @@ for (file in files) {
 
 # Function to plot TE classes in bar graph
 te_classes <- function(df) {
-  # Get sample name
+  # Get comparison name
   sample <- df %>%
     pull(sample) %>%
     unique()
