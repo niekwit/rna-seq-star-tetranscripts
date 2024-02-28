@@ -39,16 +39,19 @@ def comparisons():
     """
     sample_info = pd.read_csv("config/samples.csv")
        
-    # Get non-ref sample names without _[0-9]
-    test_conditions = sample_info[sample_info["reference"] != "yes"]["sample"].str.replace(r"_\d", "", regex=True).unique().tolist()
+    # Combine genotype and treatment to get unique conditions
+    sample_info["condition"] = sample_info["genotype"] + "_" + sample_info["treatment"]
     
-    # Get reference sample names without _[0-9]
-    ref_conditions = sample_info[sample_info["reference"] == "yes"]["sample"].str.replace(r"_\d", "", regex=True).unique().tolist()
+    # Get reference conditions
+    reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
+    
+    # Get test conditions
+    test_conditions = sample_info[sample_info["reference"] != "yes"]["condition"].unique().tolist()
     
     # Create strings for comparisons
     comparisons = []
     for test in test_conditions:
-        for ref in ref_conditions:
+        for ref in reference_conditions:
             comparisons.append(f"{test}_vs_{ref}")
-                
+    
     return comparisons

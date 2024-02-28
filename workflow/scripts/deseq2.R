@@ -1,7 +1,7 @@
 # Redirect R output to log
-#log <- file(snakemake@log[[1]], open="wt")
-#sink(log, type = "output")
-#sink(log, type = "message")
+log <- file(snakemake@log[[1]], open="wt")
+sink(log, type = "output")
+sink(log, type = "message")
 
 library(DESeq2)
 library(dplyr)
@@ -211,7 +211,6 @@ names(df.list.te) <- names.te
 # Write each df also to separate csv file
 save2csv <- function(df.list, type){
   for (i in seq(df.list)) {
-    print(paste0("results/deseq2/", names(df.list)[i], type, ".csv"))
     write.csv(df.list[[i]], 
               paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
               row.names = FALSE)
@@ -229,5 +228,5 @@ write.xlsx(df.list.te,
            snakemake@output[["te"]],
            colNames = TRUE)
 
-#sink(log, type = "output")
-#sink(log, type = "message")
+sink(log, type = "output")
+sink(log, type = "message")
