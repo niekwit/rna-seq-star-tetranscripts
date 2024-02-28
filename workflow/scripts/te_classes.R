@@ -27,7 +27,7 @@ for (i in seq_along(files)) {
   data <- read.csv(files[[1]])
   
   # Extract comparison name from file name
-  sample <- str_replace(basename(files[[1]]), ".csv", "")
+  sample <- str_replace(basename(files[[1]]), "_te.csv", "")
 
   # Annotate data with TE class
   data <- data %>%
