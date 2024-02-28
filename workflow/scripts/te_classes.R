@@ -27,6 +27,15 @@ for (i in seq_along(files)) {
   print(paste0("Loading data from ", files[[i]],"..."))
   data <- read.csv(files[[i]])
   
+  # Check if data has no lines (no differential TEs)
+  # If so just output a message and output
+  # an empty PDF file (Snakemake expects output)
+  if (nrow(data) == 0) {
+    print(paste0("No differential TEs found for ", sample, "..."))
+    ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
+    next
+  }
+
   # Extract comparison name from file name
   sample <- str_replace(basename(files[[i]]), "_te.csv", "")
   print("Annotating data...")
@@ -42,7 +51,7 @@ for (i in seq_along(files)) {
     mutate(effect = case_when(log2FoldChange > lfc & padj < fdr  ~ "Upregulated",
                               log2FoldChange < -lfc & padj < fdr ~ "Downregulated")) %>%
     dplyr::filter(effect %in% c("Upregulated", "Downregulated"))
-  print(data)
+
   # Count number of genes in each TE class
   print("Counting number of genes in each TE class...")
   df.up <- data %>%
@@ -50,13 +59,13 @@ for (i in seq_along(files)) {
     group_by(class) %>%
     summarise(Upregulated = n()) %>%
     mutate(sample = sample)
-  print(df.up)
+
   df.down <- data %>%
     dplyr::filter(effect == "Downregulated") %>%
     group_by(class) %>%
     summarise(Downregulated = n()) %>%
     mutate(sample = sample)
-  print(df.down)
+
   # Merge data and replace NA with zero
   if (nrow(df.up) != 0 & nrow(df.down) != 0 | nrow(df.up) != 0 & nrow(df.down) == 0 ) {
     df <- left_join(df.up, df.down, by = join_by(class, sample))
@@ -65,26 +74,17 @@ for (i in seq_along(files)) {
   } else if (nrow(df.up) == 0 & nrow(df.down) == 0) {
     next
   }
-  print(df)
+
   df <- df %>% 
     replace(is.na(.), 0) %>%
     melt(id.vars = c("class", "sample"),
          variable.name = "effect",
          value.name = "Count")
-  
-  # Check if df has no lines (no differential TEs)
-  # If so just output a message and output
-  # an empty PDF file (Snakemake expects output)
-  if (nrow(df) == 0) {
-    print(paste0("No differential TEs found for ", sample, "..."))
-    ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
-    next
-  }
-  
+
   # Add data to list
   te[[i]] <- df
 }
-print(te)
+
 # Function to plot TE classes in bar graph
 te_classes <- function(df) {
   # Get comparison name
