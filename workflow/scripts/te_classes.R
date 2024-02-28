@@ -17,6 +17,8 @@ lfc <- as.numeric(snakemake@params["lfc"])
 # Load data
 files <- snakemake@input[["te_csv"]] # Input
 output <- snakemake@output[["pdf"]] # Output
+print(files)
+print(output)
 
 # Empty list to store data
 te <- list()
@@ -24,11 +26,13 @@ te <- list()
 # Count all TE classes for each file for plotting
 for (i in seq_along(files)) {
   # read in data
-  data <- read.csv(files[[1]])
+  print(paste0("Reading in ", files[[i]],"..."))
+  data <- read.csv(files[[i]])
   
   # Extract comparison name from file name
-  sample <- str_replace(basename(files[[1]]), "_te.csv", "")
-
+  sample <- str_replace(basename(files[[i]]), "_te.csv", "")
+  print("Annotating data...")
+  
   # Annotate data with TE class
   data <- data %>%
     mutate(class = str_split(ensembl_gene_id, ":", simplify = TRUE)[, 3]) %>%
@@ -42,6 +46,7 @@ for (i in seq_along(files)) {
     dplyr::filter(effect %in% c("Upregulated", "Downregulated"))
   
   # Count number of genes in each TE class
+  print("Counting number of genes in each TE class...")
   df.up <- data %>%
     dplyr::filter(effect == "Upregulated") %>%
     group_by(class) %>%
@@ -69,8 +74,17 @@ for (i in seq_along(files)) {
          variable.name = "effect",
          value.name = "Count")
   
+  # Check if df has no lines (no differential TEs)
+  # If so just output a message and output
+  # an empty PDF file (Snakemake expects output)
+  if (nrow(df) == 0) {
+    print(paste0("No differential TEs found for ", sample, "..."))
+    ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
+    next
+  }
+  
   # Add data to list
-  te[[sample]] <- df
+  te[[i]] <- df
 }
 
 # Function to plot TE classes in bar graph
@@ -81,6 +95,7 @@ te_classes <- function(df) {
     unique()
 
   # Plot data
+  print(paste0("Plotting TE classes for ", sample, "..."))
   p <- ggplot(df, aes(x = class, 
                       y = Count, 
                       fill = effect)) +
@@ -105,6 +120,7 @@ te_classes <- function(df) {
   output_file <- output[grepl(sample, output)]
 
   # Save plot
+  print(paste0("Saving plot to ", output_file, "..."))
   ggsave(output_file, plot = p)
 }
 
