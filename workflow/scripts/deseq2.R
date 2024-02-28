@@ -14,17 +14,17 @@ genome <- snakemake@params[["genome"]]
 
 # Use first count file as template for count matrix
 countMatrix <- read.delim(count.files[1]) 
-names(countMatrix) <- c("index", sub(".cntTable","",basename(count.files[1])))
+names(countMatrix) <- c("index", sub(".cntTable", "", basename(count.files[1])))
 
 # Add all count data to countMatrix
 for (i in seq(from=2,to=length(count.files))) {
-    sample <- sub(".cntTable","",basename(count.files[i]))
+    sample <- sub(".cntTable", "", basename(count.files[i]))
     df <- read.delim(count.files[i])
     colnames(df) <- c("index", sample)
     
-    countMatrix <- full_join(countMatrix, 
-                             df, 
-                             by="index")
+    countMatrix <- full_join(countMatrix,
+                             df,
+                             by = "index")
   }
 
 # Remove lines with all 0s
@@ -35,20 +35,20 @@ rownames(countMatrix) <- countMatrix$index
 countMatrix$index <- NULL
 
 #### Load experiment information ####
-samples <- read.csv("config/samples.csv", header=TRUE)
+samples <- read.csv("config/samples.csv", header = TRUE)
 genotypes <- unique(samples$genotype)
 treatments <- unique(samples$treatment)
 
-if (length(treatments) > 1){
+if (length(treatments) > 1) {
   samples$comb <- paste0(samples$genotype,"_",samples$treatment)
 } else {
   samples$comb <- paste0(samples$genotype)
 }
 
 # Check if batch column exists
-if ("batch" %in% colnames(samples)){
+if ("batch" %in% colnames(samples)) {
   batches <- unique(samples$batch)
-  if (length(batches) == 1){
+  if (length(batches) == 1) {
     batches <- 1
   }
 } else {
@@ -83,7 +83,7 @@ if (batches == 1){
 save(dds, file=snakemake@output[["rdata"]])
 
 # Load reference samples
-references <- unique(samples[samples$reference == "yes" ,]$comb)
+references <- unique(samples[samples$reference == "yes" , ]$comb)
 if (length(references) == 0) {
   stop("ERROR: No reference samples found. Please check your samples.csv file.")
 }
@@ -91,19 +91,21 @@ if (length(references) == 0) {
 # Create nested lists to store all pairwise comparisons (top level:references, lower level: samples without reference)
 df.list.genes <- vector(mode="list", length = length(references))
 for (i in seq_along(references)) {
-  df.list.genes[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
+  df.list.genes[[i]] <- vector(mode = "list",
+                               length = (length(unique(samples$comb)) - 1 ))
 }
 
-df.list.te <- vector(mode="list", length = length(references))
+df.list.te <- vector(mode = "list", length = length(references))
 for (i in seq_along(references)) {
-  df.list.te[[i]] <- vector(mode="list", length = (length(unique(samples$comb)) - 1 ))
+  df.list.te[[i]] <- vector(mode = "list",
+                            length = (length(unique(samples$comb)) - 1 ))
 }
 
 # Get gene IDs
 genes <- row.names(countMatrix)
 if (grepl("hg", genome, fixed = TRUE)) {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
-} else if (grepl("mm", genome, fixed=TRUE)){
+} else if (grepl("mm", genome, fixed=TRUE)) {
   genes <- genes[grepl("ENSMUSG[0-9]{11}+", genes, perl = TRUE)]
 } else if (genome == "test") {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
@@ -113,7 +115,7 @@ if (grepl("hg", genome, fixed = TRUE)) {
 load(snakemake@input[["edb"]])
 
 # Performs pair-wise comparisons for each reference sample
-for (r in seq(references)){
+for (r in seq(references)) {
   # Copy dds
   dds_relevel <- dds
 
@@ -129,12 +131,12 @@ for (r in seq(references)){
   comparisons[1] <- NULL
 
   # Create df for each comparison
-  for (c in seq(comparisons)){
+  for (c in seq(comparisons)) {
     # Get name of comparison
     comparison <- comparisons[[c]]
     comparison <- str_replace(comparison, "comb_", "") 
 
-    res <- results(dds_relevel, name=comparisons[[c]])
+    res <- results(dds_relevel, name = comparisons[[c]])
 
     df <- as.data.frame(res) %>%
       mutate(ensembl_gene_id = res@rownames, .before = 1)
@@ -194,21 +196,22 @@ flattenlist <- function(x) {
     return(out)
   }
 }
-print(17)
+
 # Flatten lists
 df.list.genes <- flattenlist(df.list.genes)
 df.list.te <- flattenlist(df.list.te)
-print(18)
+
 # Get contrast names from each df in list
 names.genes <- lapply(df.list.genes, function(x) unique(x$contrast_name))
 names(df.list.genes) <- names.genes
-print(19)
+
 names.te <- lapply(df.list.te, function(x) unique(x$contrast_name))
 names(df.list.te) <- names.te
-print(20)
+
 # Write each df also to separate csv file
 save2csv <- function(df.list, type){
-  for (i in seq(df.list)){
+  for (i in seq(df.list)) {
+    print(paste0("results/deseq2/", names(df.list)[i], type, ".csv"))
     write.csv(df.list[[i]], 
               paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
               row.names = FALSE)
@@ -216,15 +219,15 @@ save2csv <- function(df.list, type){
 }
 save2csv(df.list.genes, "_genes")
 save2csv(df.list.te, "_te")
-print(21)
+
 # Write output to file
 write.xlsx(df.list.genes, 
            snakemake@output[["genes"]],
            colNames = TRUE)
-print(22)
+
 write.xlsx(df.list.te,
            snakemake@output[["te"]],
            colNames = TRUE)
-print(23)
+
 sink(log, type = "output")
 sink(log, type = "message")
