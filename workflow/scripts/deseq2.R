@@ -1,7 +1,7 @@
 # Redirect R output to log
-log <- file(snakemake@log[[1]], open="wt")
-sink(log, type = "output")
-sink(log, type = "message")
+#log <- file(snakemake@log[[1]], open="wt")
+#sink(log, type = "output")
+#sink(log, type = "message")
 
 library(DESeq2)
 library(dplyr)
@@ -229,5 +229,5 @@ write.xlsx(df.list.te,
            snakemake@output[["te"]],
            colNames = TRUE)
 
-sink(log, type = "output")
-sink(log, type = "message")
+#sink(log, type = "output")
+#sink(log, type = "message")
