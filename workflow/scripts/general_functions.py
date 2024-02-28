@@ -38,18 +38,17 @@ def comparisons():
     Create pairwise comparison strings from samples.csv
     """
     sample_info = pd.read_csv("config/samples.csv")
+       
+    # Get non-ref sample names without _[0-9]
+    test_conditions = sample_info[sample_info["reference"] != "yes"]["sample"].str.replace(r"_\d", "", regex=True).unique().tolist()
     
-    # Get reference samples
-    references = sample_info[sample_info["reference"] == "yes"]["sample"].tolist()
+    # Get reference sample names without _[0-9]
+    ref_conditions = sample_info[sample_info["reference"] == "yes"]["sample"].str.replace(r"_\d", "", regex=True).unique().tolist()
     
-    # Get all samples
-    samples = sample_info["sample"].tolist()
-    
-    # Create pairwise comparisons
+    # Create strings for comparisons
     comparisons = []
-    for sample in samples:
-        for reference in references:
-            if sample != reference:
-                comparisons.append(f"{sample}_vs_{reference}")
+    for test in test_conditions:
+        for ref in ref_conditions:
+            comparisons.append(f"{test}_vs_{ref}")
                 
     return comparisons
