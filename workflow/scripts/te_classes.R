@@ -26,6 +26,7 @@ no_data <- function(df) {
   if (nrow(df) == 0) {
     print(paste0("No differential TEs found for ", sample, "..."))
     ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
+    TRUE # return value
   }
 }
 
@@ -36,7 +37,7 @@ for (i in seq_along(files)) {
   data <- read.csv(files[[i]])
   
   # DESeq2 data might be empty?
-  if (no_data(data) == FALSE) {
+  if (no_data(data) == TRUE) {
     next
   }
 
@@ -59,7 +60,7 @@ for (i in seq_along(files)) {
   # Check if data has no lines (no differential TEs)
   # If so just output a message and output
   # an empty PDF file (Snakemake expects output)
-  if (no_data(data) == FALSE) {
+  if (no_data(data) == TRUE) {
     next
   }
 
