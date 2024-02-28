@@ -37,7 +37,8 @@ for (i in seq_along(files)) {
   data <- read.csv(files[[i]])
   
   # DESeq2 data might be empty?
-  if (no_data(data) == TRUE) {
+  no.data <- no_data(data)
+  if (no.data == TRUE) {
     next
   }
 
@@ -60,7 +61,8 @@ for (i in seq_along(files)) {
   # Check if data has no lines (no differential TEs)
   # If so just output a message and output
   # an empty PDF file (Snakemake expects output)
-  if (no_data(data) == TRUE) {
+  no.data <- no_data(data)
+  if (no.data == TRUE) {
     next
   }
 
