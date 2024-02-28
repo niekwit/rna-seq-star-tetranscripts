@@ -15,9 +15,12 @@ genome <- snakemake@params[["genome"]]
 if (genome == "test") {
   # For data set with few genes
   # https://support.bioconductor.org/p/98634/
+  # https://support.bioconductor.org/p/97424/
   dds <- estimateSizeFactors(dds)
   rows <- sum( rowMeans( counts(dds, normalized = TRUE)) > 5 )
-  vsd <- vst(dds, nsub = rows)
+  vsd <- vst(dds, 
+             nsub = rows,
+             fitType = "mean")
 } else {
   vsd <- vst(dds, blind=FALSE)
 }
