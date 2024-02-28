@@ -1,7 +1,7 @@
 # Redirect R output to log
 log <- file(snakemake@log[[1]], open = "wt")
-sink(log, type = "output")
-sink(log, type = "message")
+#sink(log, type = "output")
+#sink(log, type = "message")
 
 # Load libraries
 library(ggplot2)
@@ -15,19 +15,21 @@ fdr <- as.numeric(snakemake@params["fdr"])
 lfc <- as.numeric(snakemake@params["lfc"])
 
 # Load data
-files <- snakemake@input[["te_csv"]]
+files <- snakemake@input[["te_csv"]] # Input
+output <- snakemake@output[["pdf"]] # Output
 
 # Empty list to store data
 te <- list()
 
 # Count all TE classes for each file for plotting
-for (file in files) {
+for (i in seq_along(files)) {
   # read in data
-  data <- read.csv(file)
+  print(files[[1]])
+  data <- read.csv(files[[1]])
   
   # Extract comparison name from file name
-  sample <- str_replace(dirname(file), ".csv", "")
-  
+  sample <- str_replace(dirname(files[[1]]), ".csv", "")
+  print(sample)
   # Annotate data with TE class
   data <- data %>%
     mutate(class = str_split(ensembl_gene_id, ":", simplify = TRUE)[, 3]) %>%
@@ -53,7 +55,7 @@ for (file in files) {
     summarise(Downregulated = n()) %>%
     mutate(sample = sample)
   
-  # merge data and replace NA with zero
+  # Merge data and replace NA with zero
   if (nrow(df.up) != 0 & nrow(df.down) != 0 | nrow(df.up) != 0 & nrow(df.down) == 0 ) {
     df <- left_join(df.up, df.down, by = join_by(class, sample))
   } else if (nrow(df.up) == 0 & nrow(df.down) != 0) {
@@ -78,7 +80,7 @@ te_classes <- function(df) {
   sample <- df %>%
     pull(sample) %>%
     unique()
-  
+  print(sample)
   # Plot data
   p <- ggplot(df, aes(x = class, 
                       y = Count, 
@@ -101,15 +103,13 @@ te_classes <- function(df) {
     scale_y_continuous(expand = c(0, 0))
   
   # Save plot
-  ggsave(paste0("results/plots/te_classes/", 
-         sample, 
-         "_te_classes.pdf"), 
-         plot = p)
+  print(output[[i]])
+  ggsave(output[[i]], plot = p)
 }
 
-# Plot data
+# Plot data for each comparison
 lapply(te, te_classes)
 
 # Close redirection of output/messages
-sink(log, type = "output")
-sink(log, type = "message")
+#sink(log, type = "output")
+#sink(log, type = "message")
