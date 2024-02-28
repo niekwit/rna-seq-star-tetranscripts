@@ -21,20 +21,23 @@ output <- snakemake@output[["pdf"]] # Output
 # Empty list to store data
 te <- list()
 
+# Function to check for emmpty data
+check_data <- function(df) {
+  if (nrow(df) == 0) {
+    print(paste0("No differential TEs found for ", sample, "..."))
+    ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
+    next
+  }
+}
+
 # Count all TE classes for each file for plotting
 for (i in seq_along(files)) {
   # read in data
   print(paste0("Loading data from ", files[[i]],"..."))
   data <- read.csv(files[[i]])
   
-  # Check if data has no lines (no differential TEs)
-  # If so just output a message and output
-  # an empty PDF file (Snakemake expects output)
-  if (nrow(data) == 0) {
-    print(paste0("No differential TEs found for ", sample, "..."))
-    ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
-    next
-  }
+  # DESeq2 data might be empty?
+  check_data(data)
 
   # Extract comparison name from file name
   sample <- str_replace(basename(files[[i]]), "_te.csv", "")
@@ -51,6 +54,11 @@ for (i in seq_along(files)) {
     mutate(effect = case_when(log2FoldChange > lfc & padj < fdr  ~ "Upregulated",
                               log2FoldChange < -lfc & padj < fdr ~ "Downregulated")) %>%
     dplyr::filter(effect %in% c("Upregulated", "Downregulated"))
+
+  # Check if data has no lines (no differential TEs)
+  # If so just output a message and output
+  # an empty PDF file (Snakemake expects output)
+  check_data(data)
 
   # Count number of genes in each TE class
   print("Counting number of genes in each TE class...")

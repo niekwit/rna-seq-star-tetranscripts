@@ -17,7 +17,7 @@ countMatrix <- read.delim(count.files[1])
 names(countMatrix) <- c("index", sub(".cntTable", "", basename(count.files[1])))
 
 # Add all count data to countMatrix
-for (i in seq(from=2,to=length(count.files))) {
+for (i in seq(from = 2, to = length(count.files))) {
     sample <- sub(".cntTable", "", basename(count.files[i]))
     df <- read.delim(count.files[i])
     colnames(df) <- c("index", sample)
@@ -211,6 +211,11 @@ names(df.list.te) <- names.te
 # Write each df also to separate csv file
 save2csv <- function(df.list, type){
   for (i in seq(df.list)) {
+    print(df.list[[i]])
+    # Check if df is empty
+    stopifnot(nrow(df.list[[i]]) > 0)
+    
+    # Write to file
     write.csv(df.list[[i]], 
               paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
               row.names = FALSE)
