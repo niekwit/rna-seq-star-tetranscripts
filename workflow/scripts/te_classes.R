@@ -28,7 +28,7 @@ for (i in seq_along(files)) {
   
   # Extract comparison name from file name
   sample <- str_replace(basename(files[[1]]), ".csv", "")
-  print(sample)
+
   # Annotate data with TE class
   data <- data %>%
     mutate(class = str_split(ensembl_gene_id, ":", simplify = TRUE)[, 3]) %>%
@@ -101,9 +101,11 @@ te_classes <- function(df) {
     labs(title = sample) +
     scale_y_continuous(expand = c(0, 0))
   
+  # Get output file that matches sample value from output
+  output_file <- output[grepl(sample, output)]
+
   # Save plot
-  print(output[[i]])
-  ggsave(output[[i]], plot = p)
+  ggsave(output_file, plot = p)
 }
 
 # Plot data for each comparison
