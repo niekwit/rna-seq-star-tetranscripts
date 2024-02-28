@@ -35,6 +35,8 @@ rule heatmap_sample_distance:
         "results/deseq2/dds.RData",
     output:
         report("results/plots/sample_distance.pdf", caption="report/sample_distance.rst", category="Sample distances"),
+    params:
+        genome=resources.genome,
     conda:
         "../envs/deseq2.yml"
     threads: config["resources"]["plotting"]["cpu"]
