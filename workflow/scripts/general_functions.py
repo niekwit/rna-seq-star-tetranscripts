@@ -22,7 +22,8 @@ def import_samples():
 
 
 def star_arguments(config):
-    """Returns multimapping arguments for STAR set in config.yaml
+    """
+    Returns multimapping arguments for STAR set in config.yaml
     """
     ofmn = config["mapping"]["outFilterMultimapNmax"]
     wamn = config["mapping"]["winAnchorMultimapNmax"]
@@ -30,4 +31,25 @@ def star_arguments(config):
     star_extra = f"--outFilterMultimapNmax {ofmn} --winAnchorMultimapNmax {wamn} {extra_params}"
     
     return star_extra
- 
+
+
+def comparisons():
+    """
+    Create pairwise comparison strings from samples.csv
+    """
+    sample_info = pd.read_csv("config/samples.csv")
+    
+    # Get reference samples
+    references = sample_info[sample_info["reference"] == "yes"]["sample"].tolist()
+    
+    # Get all samples
+    samples = sample_info["sample"].tolist()
+    
+    # Create pairwise comparisons
+    comparisons = []
+    for sample in samples:
+        for reference in references:
+            if sample != reference:
+                comparisons.append(f"{sample}_vs_{reference}")
+                
+    return comparisons

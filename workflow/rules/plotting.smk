@@ -69,9 +69,9 @@ rule volcano_plot:
 
 rule plot_te_classes:
     input:
-        "results/deseq2/deseq2_te.xlsx",
+        te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS)
     output:
-        report(directory("results/plots/te_classes"), caption="report/te_classes.rst", category="TE classes"),
+        pdf=report(expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS), caption="report/te_classes.rst", category="TE classes"),
     params:
         fdr=config["fdr_cutoff"],
         lfc=config["fc_cutoff"]

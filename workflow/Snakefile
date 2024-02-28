@@ -4,7 +4,7 @@ from scripts import general_functions as utils
 from snakemake.utils import min_version
 
 # set minimum snakemake version
-min_version("6.4.1")
+min_version("7.25.0")
 
 # load config file
 configfile: "config/config.yaml"
@@ -14,6 +14,7 @@ resources = Resources(config["genome"], config["ensembl_genome_build"])
 
 # get sample names
 SAMPLES = utils.import_samples()
+COMPARISONS = utils.comparisons()
 
 # import rules
 include: "rules/fastqc.smk"
@@ -32,9 +33,9 @@ rule all:
         "results/plots/sample_distance.pdf",
         "results/plots/volcano_genes/",
         "results/plots/volcano_te/",
-        "results/plots/te_classes",
         "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
+        expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS)
 
 # save snakemake terminal output to log file
 time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -47,7 +48,7 @@ onsuccess:
 
 onerror:
     shell("cp -v {log} {snake_log}")
-    print(f"Analysis (partly) failed...\nCheck {snake_log} for details")
+    print(f"Analysis failed...\nCheck {snake_log} for details")
 
 
 
