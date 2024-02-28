@@ -24,11 +24,10 @@ te <- list()
 # Count all TE classes for each file for plotting
 for (i in seq_along(files)) {
   # read in data
-  print(files[[1]])
   data <- read.csv(files[[1]])
   
   # Extract comparison name from file name
-  sample <- str_replace(dirname(files[[1]]), ".csv", "")
+  sample <- str_replace(basename(files[[1]]), ".csv", "")
   print(sample)
   # Annotate data with TE class
   data <- data %>%
@@ -80,7 +79,7 @@ te_classes <- function(df) {
   sample <- df %>%
     pull(sample) %>%
     unique()
-  print(sample)
+
   # Plot data
   p <- ggplot(df, aes(x = class, 
                       y = Count, 
