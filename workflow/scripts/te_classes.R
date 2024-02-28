@@ -22,11 +22,10 @@ output <- snakemake@output[["pdf"]] # Output
 te <- list()
 
 # Function to check for emmpty data
-check_data <- function(df) {
+no_data <- function(df) {
   if (nrow(df) == 0) {
     print(paste0("No differential TEs found for ", sample, "..."))
     ggsave(output[grepl(sample, output)], plot = ggplot() + theme_void())
-    next
   }
 }
 
@@ -37,7 +36,9 @@ for (i in seq_along(files)) {
   data <- read.csv(files[[i]])
   
   # DESeq2 data might be empty?
-  check_data(data)
+  if (no_data(data) == FALSE) {
+    next
+  }
 
   # Extract comparison name from file name
   sample <- str_replace(basename(files[[i]]), "_te.csv", "")
@@ -58,7 +59,9 @@ for (i in seq_along(files)) {
   # Check if data has no lines (no differential TEs)
   # If so just output a message and output
   # an empty PDF file (Snakemake expects output)
-  check_data(data)
+  if (no_data(data) == FALSE) {
+    next
+  }
 
   # Count number of genes in each TE class
   print("Counting number of genes in each TE class...")
