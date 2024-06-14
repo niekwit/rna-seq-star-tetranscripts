@@ -1,0 +1,81 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: Snakemake configuration file
+
+type: object
+
+properties:
+  genome:
+    type: string
+    description: "Genome build to use for mapping and annotation"
+    enum: ["mm39", "hg38", "hg19", "mm38"]
+  ensembl_genome_build:
+    type: string
+    description: "Ensembl genome build version"
+    default: 110
+  strand:
+    type: string
+    description: "Strandness of the library"
+    enum: ["forward", "reverse", "unstranded"]
+    default: "reverse"
+  fdr_cutoff:
+    type: number
+    description: "FDR cutoff for volcano plots"
+    default: 0.05
+  fc_cutoff:
+    type: number
+    description: "Log2 fold change cutoff for volcano plots"
+    default: 0.5
+  mapping:
+    type: object
+    description: "STAR mapping parameters"
+    properties:
+      outFilterMultimapNmax:
+        type: integer
+        description: "Maximum number of multiple alignments allowed"
+      winAnchorMultimapNmax:
+        type: integer
+        description: "Maximum number of multiple alignments allowed for chimeric reads"
+      extra_params:
+        type: string
+        description: "Additional arguments to pass to STAR"
+        default: ""
+  deeptools:
+    type: object
+    description: "DeepTools parameters"
+    properties:
+      normalisation:
+        type: string
+        description: "Normalisation method for DeepTools"
+        enum: ["RPKM", "FPKM", "TPM"]
+        default: "RPKM"
+      binsize:
+        type: integer
+        description: "Bin size for DeepTools"
+        default: 10
+  resources:
+    type: object
+    description: "Computing resources for different steps"
+    properties:
+      trim:
+        type: object
+        properties:
+          cpu:
+            type: integer
+            description: "Number of CPUs to use"
+            default: 8
+          time:
+            type: integer
+            description: "Time in minutes"
+            default: 60
+      fastqc:
+        type: object
+        properties:
+          cpu:
+            type: integer
+            description: "Number of CPUs to use"
+            default: 4
+          time:
+            type: integer
+            description: "Time in minutes"
+            default:
