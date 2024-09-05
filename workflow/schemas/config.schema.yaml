@@ -8,7 +8,7 @@ properties:
   genome:
     type: string
     description: "Genome build to use for mapping and annotation"
-    enum: ["mm39", "hg38", "hg19", "mm38"]
+    enum: ["mm39", "hg38", "hg19", "mm38", "T2T-CHM13v2.0"]
   ensembl_genome_build:
     type: string
     description: "Ensembl genome build version"
