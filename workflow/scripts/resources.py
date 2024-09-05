@@ -41,6 +41,11 @@ class Resources:
             self.gtf_url = f"{base_url_ens}gtf/mus_musculus/Mus_musculus.{name}.{build}.gtf.gz"
             self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
         
+        elif genome == "T2T-CHM13v2.0":
+            self.fasta_url = "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_genomic.fna.gz"
+            self.gtf_url = "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf.gz"
+            self.tegtf_url = "https://github.com/niekwit/rna-seq-star-tetranscripts/raw/main/resources/T2T_CHM13_v2_rmsk_TE.gtf.gz"
+        
         elif genome == "test":
             # Download fasta for only one chromosome            
             self.fasta_url = "https://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz"
