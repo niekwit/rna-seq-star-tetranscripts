@@ -1,22 +1,34 @@
 import datetime
 from scripts.resources import Resources
 from scripts import general_functions as utils
-from snakemake.utils import min_version
+from snakemake.utils import min_version, validate
 
-# set minimum snakemake version
-min_version("7.25.0")
+# Set minimum snakemake version
+min_version("8.25.5")
 
-# load config file
+# Workflow version
+VERSION = "v0.4.0"
+
+# Load config file
 configfile: "config/config.yaml"
 
-# load resources to be used in rules
+# Wrapper version
+wrapper_version = "v5.5.1"
+
+logger.info(f"Workflow version: {VERSION}")
+logger.info(f"Wrapper version: {wrapper_version}")
+
+# Define Docker container for Apptainer usage
+containerized: f"docker://niekwit/rna-seq-star-tetranscripts:{VERSION}"
+
+# Load resources to be used in rules
 resources = Resources(config["genome"], config["ensembl_genome_build"])
 
-# get sample names
+# Get sample names
 SAMPLES = utils.import_samples()
 COMPARISONS = utils.comparisons()
 
-# import rules
+# Import rules
 include: "rules/fastqc.smk"
 include: "rules/trimming.smk"
 include: "rules/resources.smk"
@@ -26,18 +38,18 @@ include: "rules/deseq2.smk"
 include: "rules/plotting.smk"
 include: "rules/bigwig.smk"
 
-# target rule
+# Target rule
 rule all:
     input: 
         "results/plots/mapping_rates.pdf",
         "results/plots/sample_distance.pdf",
-        "results/plots/volcano_genes/",
-        "results/plots/volcano_te/",
+        "results/plots/volcano_genes/", #TO DO: use {comparison}
+        "results/plots/volcano_te/", #TO DO: use {comparison}
         "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
         expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS)
 
-# save snakemake terminal output to log file
+# Save snakemake terminal output to log file
 time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 snake_log = f"logs/snakemake/{time}_snakemake.log"
 os.makedirs("logs/snakemake", exist_ok=True)
@@ -49,6 +61,3 @@ onsuccess:
 onerror:
     shell("cp -v {log} {snake_log}")
     print(f"Analysis failed...\nCheck {snake_log} for details")
-
-
-
