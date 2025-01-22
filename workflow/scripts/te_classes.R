@@ -1,7 +1,7 @@
 # Redirect R output to log
 log <- file(snakemake@log[[1]], open = "wt")
-#sink(log, type = "output")
-#sink(log, type = "message")
+sink(log, type = "output")
+sink(log, type = "message")
 
 # Load libraries
 library(ggplot2)
@@ -21,7 +21,7 @@ output <- snakemake@output[["pdf"]] # Output
 # Empty list to store data
 te <- list()
 
-# Function to check for emmpty data
+# Function to check for empty data
 no_data <- function(df) {
   if (nrow(df) == 0) {
     print(paste0("No differential TEs found for ", sample, "..."))
@@ -103,10 +103,13 @@ for (i in seq_along(files)) {
 
 # Function to plot TE classes in bar graph
 te_classes <- function(df) {
+  # Skip if no data
+  if (is.null(df)) {
+    return()
+  }
+  
   # Get comparison name
-  sample <- df %>%
-    pull(sample) %>%
-    unique()
+  sample <- unique(df$sample)
 
   # Plot data
   print(paste0("Plotting TE classes for ", sample, "..."))
@@ -142,5 +145,5 @@ te_classes <- function(df) {
 lapply(te, te_classes)
 
 # Close redirection of output/messages
-#sink(log, type = "output")
-#sink(log, type = "message")
+sink(log, type = "output")
+sink(log, type = "message")
