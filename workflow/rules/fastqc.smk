@@ -13,7 +13,7 @@ rule fastqc:
         runtime=config["resources"]["fastqc"]["time"],
         mem_mb = 1024
     wrapper:
-        "v3.3.3/bio/fastqc"
+        "v5.5.1/bio/fastqc"
 
 
 rule multiqc: 

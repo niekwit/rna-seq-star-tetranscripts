@@ -121,6 +121,6 @@ rule index_bam:
     log:
         "logs/samtools/index_{sample}.log"
     wrapper:
-        "v3.3.3/bio/samtools/index"
+        "v5.5.1/bio/samtools/index"
 
 
