@@ -16,7 +16,7 @@ def import_samples():
             not_found.append(r2)
     if len(not_found) != 0:
         not_found = "\n".join(not_found)
-        raise ValueError(f"ERROR: following files not found:\n{not_found}")
+        raise ValueError(f"Following files not found:\n{not_found}")
         
     return SAMPLES    
 
@@ -38,15 +38,27 @@ def comparisons():
     Create pairwise comparison strings from samples.csv
     """
     sample_info = pd.read_csv("config/samples.csv")
-       
-    # Combine genotype and treatment to get unique conditions
-    sample_info["condition"] = sample_info["genotype"] + "_" + sample_info["treatment"]
-    
-    # Get reference conditions
-    reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
-    
-    # Get test conditions
-    test_conditions = sample_info[sample_info["reference"] != "yes"]["condition"].unique().tolist()
+    if len(sample_info["genotype"].unique()) > 1 and len(sample_info["treatment"].unique()) > 1:
+        # Combine genotype and treatment to get unique conditions
+        sample_info["condition"] = sample_info[["genotype","treatment"]].agg('_'.join, axis=1)
+
+        # Get reference conditions
+        reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
+        
+        # Get test conditions
+        test_conditions = sample_info[sample_info["reference"] != "yes"]["condition"].unique().tolist()
+    elif len(sample_info["genotype"].unique()) > 1 and len(sample_info["treatment"].unique()) == 1:
+        # Get reference conditions
+        reference_conditions = sample_info[sample_info["reference"] == "yes"]["genotype"].unique().tolist()
+
+        # Get test conditions
+        test_conditions = sample_info[sample_info["reference"] != "yes"]["genotype"].unique().tolist()
+    elif len(sample_info["genotype"].unique()) == 1 and len(sample_info["treatment"].unique()) > 1:
+        # Get reference conditions
+        reference_conditions = sample_info[sample_info["reference"] == "yes"]["treatment"].unique().tolist()
+
+        # Get test conditions
+        test_conditions = sample_info[sample_info["reference"] != "yes"]["treatment"].unique().tolist()
     
     # Create strings for comparisons
     comparisons = []
