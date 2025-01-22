@@ -3,6 +3,8 @@ rule create_annotation_db:
         gtf=resources.gtf,
     output:
         edb="resources/edb.RData"
+    params:
+        genome=resources.genome
     conda:
         "../envs/rtracklayer.yml"
     threads: config["resources"]["deseq2"]["cpu"]
