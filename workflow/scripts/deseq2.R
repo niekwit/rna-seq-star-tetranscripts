@@ -40,9 +40,9 @@ genotypes <- unique(samples$genotype)
 treatments <- unique(samples$treatment)
 
 if (length(treatments) > 1) {
-  samples$comb <- paste0(samples$genotype,"_",samples$treatment)
+  samples$comb <- paste0(samples$genotype, "_", samples$treatment)
 } else {
-  samples$comb <- paste0(samples$genotype)
+  samples$comb <- samples$genotype
 }
 
 # Check if batch column exists
@@ -69,18 +69,20 @@ if (length((all_samples)) != length(count.files)){
 }
 
 # Create DESeq2 object
-if (batches == 1){
+if (length(batches) == 1){
+  print("Not including batch factor in DESeq2 design...")
   dds <- DESeqDataSetFromMatrix(countData = countMatrix,
                               colData = samples,
                               design = ~comb)
 } else {
+  print("Including batch factor in DESeq2 design...")
   dds <- DESeqDataSetFromMatrix(countData = countMatrix,
                               colData = samples,
                               design = ~batch + comb)
 }
 
 # Save DESeqDataSet to file (input for other scripts)
-save(dds, file=snakemake@output[["rdata"]])
+save(dds, file = snakemake@output[["rdata"]])
 
 # Load reference samples
 references <- unique(samples[samples$reference == "yes" , ]$comb)
@@ -113,6 +115,8 @@ if (grepl("hg", genome, fixed = TRUE)) {
 
 # Get gene annotation
 load(snakemake@input[["edb"]])
+# Remove duplicate lines
+gene.info <-gene.info[!duplicated(gene.info$ensembl_gene_id), ]
 
 # Performs pair-wise comparisons for each reference sample
 for (r in seq(references)) {
@@ -120,6 +124,7 @@ for (r in seq(references)) {
   dds_relevel <- dds
 
   # Relevel dds to reference sample
+  print(paste("Releveling to reference sample: ", references[r], "..."))
   dds_relevel$comb <- relevel(dds$comb, ref = references[r])
 
   # Differential expression analysis
@@ -211,10 +216,8 @@ names(df.list.te) <- names.te
 # Write each df also to separate csv file
 save2csv <- function(df.list, type){
   for (i in seq(df.list)) {
-    print(df.list[[i]])
     # Check if df is empty
     stopifnot(nrow(df.list[[i]]) > 0)
-    
     # Write to file
     write.csv(df.list[[i]], 
               paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
