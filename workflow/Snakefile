@@ -22,11 +22,13 @@ logger.info(f"Wrapper version: {wrapper_version}")
 containerized: f"docker://niekwit/rna-seq-star-tetranscripts:{VERSION}"
 
 # Load resources to be used in rules
-resources = Resources(config["genome"], config["ensembl_genome_build"])
+genome = config["genome"]
+resources = Resources(genome, config["ensembl_genome_build"])
 
 # Get sample names
 SAMPLES = utils.import_samples()
 COMPARISONS = utils.comparisons()
+CHROMOSOMES = utils.get_chromosomes(genome)
 
 # Import rules
 include: "rules/fastqc.smk"
