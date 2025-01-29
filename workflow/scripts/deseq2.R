@@ -3,9 +3,8 @@ log <- file(snakemake@log[[1]], open="wt")
 sink(log, type = "output")
 sink(log, type = "message")
 
+library(tidyverse)
 library(DESeq2)
-library(dplyr)
-library(stringr)
 library(openxlsx)
 
 # Load Snakemake variables
@@ -48,8 +47,10 @@ if (length(treatments) > 1) {
 # Check if batch column exists
 if ("batch" %in% colnames(samples)) {
   batches <- unique(samples$batch)
-  if (length(batches) == 1) {
+  if (length(batches) > 1) {
     batches <- 1
+  } else {
+    samples$batch <- as.factor(samples$batch)
   }
 } else {
   batches <- 1
@@ -65,7 +66,8 @@ if (length((all_samples)) != length(count.files)){
   for (i in seq(omitted)){
     print(basename(gsub(pattern = "\\.cntTable", "", omitted[i])))
    }
-  count.files <- count.files[basename(gsub(pattern = "\\.cntTable$", "", count.files)) %in% all_samples]
+  # Remove omitted samples from countMatrix
+  countMatrix <- countMatrix[, colnames(countMatrix) %in% all_samples]
 }
 
 # Create DESeq2 object
@@ -115,8 +117,9 @@ if (grepl("hg", genome, fixed = TRUE)) {
 
 # Get gene annotation
 load(snakemake@input[["edb"]])
+
 # Remove duplicate lines
-gene.info <-gene.info[!duplicated(gene.info$ensembl_gene_id), ]
+gene.info <- gene.info[!duplicated(gene.info$ensembl_gene_id), ]
 
 # Performs pair-wise comparisons for each reference sample
 for (r in seq(references)) {
