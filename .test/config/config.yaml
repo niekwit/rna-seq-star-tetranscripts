@@ -1,15 +1,23 @@
 genome: test
-ensembl_genome_build: "110"
+ensembl_genome_build: 113
 strand: reverse # check https://pypi.org/project/TEtranscripts/
+
 fdr_cutoff: 0.05 # cut off for volcano plots
 fc_cutoff: 0.5 # log2 fold change cut off for volcano plots
+
 mapping: # STAR mapping parameters
   outFilterMultimapNmax: "100"
   winAnchorMultimapNmax: "100"
   extra_params : "" # additional arguments to pass to STAR
+
+# Split bam files by chromosome for parallel processing of each sample
+# This is recommended for running large datasets on a cluster
+split_bam: False
+
 deeptools:
   normalisation: RPKM
   binsize: 1000
+
 resources: # computing resources
   trim:
     cpu: 8
