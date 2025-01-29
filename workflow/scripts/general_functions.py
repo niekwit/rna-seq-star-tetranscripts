@@ -67,3 +67,15 @@ def comparisons():
             comparisons.append(f"{test}_vs_{ref}")
     
     return comparisons
+
+
+def get_chromosomes(genome):
+    """
+    Return a list of chromosomes for the reference genome
+    """
+    if "hg" in genome or "T2T" in genome:
+        return [i for i in range(1,23)] + ["X", "Y"]
+    elif "mm" in genome:
+        return [i for i in range(1,20)] + ["X", "Y"]
+    else:
+        raise ValueError(f"Genome {genome} not found")
