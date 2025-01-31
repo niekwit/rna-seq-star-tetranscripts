@@ -1,4 +1,4 @@
-rule mapping_rates_plot:
+rule plot_mapping_rates:
     input:
         expand("results/mapped/{sample}/{sample}Log.final.out", sample=SAMPLES)
     output:
@@ -14,7 +14,7 @@ rule mapping_rates_plot:
         "../scripts/mapping_rates.R"
 
 
-rule pca_plot:
+rule plot_pca:
     input:
         "results/deseq2/dds.RData",
     output:
@@ -30,7 +30,7 @@ rule pca_plot:
         "../scripts/pca.R"
 
 
-rule heatmap_sample_distance:
+rule plot_sample_distance:
     input:
         "results/deseq2/dds.RData",
     output:
@@ -48,7 +48,7 @@ rule heatmap_sample_distance:
         "../scripts/heatmap_sd.R"
 
 
-rule volcano_plot:
+rule plot_volcano:
     input:
         csv="results/deseq2/{comparison}_{type}.csv",
     output:
