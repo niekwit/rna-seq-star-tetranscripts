@@ -5,9 +5,9 @@ rule plot_mapping_rates:
         report("results/plots/mapping_rates.pdf", caption="report/mapping_rates.rst", category="Mapping rates")
     conda:
         "../envs/deseq2.yml"
-    threads: config["resources"]["plotting"]["cpu"]
+    threads: 1
     resources:
-        runtime=config["resources"]["plotting"]["time"]
+        runtime=5
     log:
         "logs/plots/mapping_rates.log"
     script:
@@ -21,9 +21,9 @@ rule plot_pca:
         report("results/plots/pca.pdf", caption="report/pca.rst", category="PCA"),
     conda:
         "../envs/deseq2.yml"
-    threads: config["resources"]["plotting"]["cpu"]
+    threads: 2
     resources:
-        runtime=config["resources"]["plotting"]["time"]
+        runtime=10
     log:
         "logs/plots/pca.log"
     script:
@@ -39,9 +39,9 @@ rule plot_sample_distance:
         genome=resources.genome,
     conda:
         "../envs/deseq2.yml"
-    threads: config["resources"]["plotting"]["cpu"]
+    threads: 1
     resources:
-        runtime=config["resources"]["plotting"]["time"]
+        runtime=10
     log:
         "logs/plots/sample_distance.log"
     script:
@@ -77,9 +77,9 @@ rule plot_te_classes:
         lfc=config["fc_cutoff"]
     conda:
         "../envs/deseq2.yml"
-    threads: config["resources"]["plotting"]["cpu"]
+    threads: 1
     resources:
-        runtime=config["resources"]["plotting"]["time"]
+        runtime=15
     log:
         "logs/plots/te_classes.log"
     script:

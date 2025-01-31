@@ -6,9 +6,9 @@ rule trim_galore:
         report_fwd="results/trimmed/{sample}_R1_001.fastq.gz_trimming_report.txt",
         fasta_rev=temp("results/trimmed/{sample}_val_2.fq.gz"),
         report_rev="results/trimmed/{sample}_R2_001.fastq.gz_trimming_report.txt",
-    threads: config["resources"]["trim"]["cpu"]
+    threads: 8
     resources:
-        runtime=config["resources"]["trim"]["time"],
+        runtime=45,
     log:
         "logs/trim_galore/{sample}.log",
     wrapper:

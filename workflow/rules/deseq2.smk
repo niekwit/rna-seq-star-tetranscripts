@@ -7,9 +7,9 @@ rule create_annotation_db:
         genome=resources.genome
     conda:
         "../envs/rtracklayer.yml"
-    threads: config["resources"]["deseq2"]["cpu"]
+    threads: 2
     resources:
-        runtime=config["resources"]["deseq2"]["time"]
+        runtime=30
     log:
         "logs/rtracklayer/create_annotation_db.log"
     script:
@@ -26,9 +26,9 @@ rule deseq2:
     params:
         strand=config["strand"],
         genome=resources.genome
-    threads: config["resources"]["deseq2"]["cpu"]
+    threads: 4
     resources:
-        runtime=config["resources"]["deseq2"]["time"]
+        runtime=90
     conda:
         "../envs/deseq2.yml"
     log:

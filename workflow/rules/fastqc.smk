@@ -8,10 +8,10 @@ rule fastqc:
         extra = "--quiet"
     log:
         "logs/fastqc/{sample}{end}.log"
-    threads: config["resources"]["fastqc"]["cpu"]
+    threads: 4
     resources:
-        runtime=config["resources"]["fastqc"]["time"],
-        mem_mb = 1024
+        runtime=20,
+        mem_mb = 2048
     wrapper:
         "v5.5.1/bio/fastqc"
 
@@ -27,9 +27,9 @@ rule multiqc:
         extra="",  # Optional: extra parameters for multiqc
     log:
         "logs/multiqc/multiqc.log"
-    threads: config["resources"]["fastqc"]["cpu"]
+    threads: 1
     resources:
-        runtime=config["resources"]["fastqc"]["time"]
+        runtime=15
     conda:
         "../envs/mapping.yml"
     shell:

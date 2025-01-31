@@ -6,9 +6,9 @@ rule get_fasta:
         url=resources.fasta_url,
     log:
         "logs/resources/get_fasta.log"
-    threads: config["resources"]["samtools"]["cpu"]
+    threads: 1
     resources: 
-        runtime=config["resources"]["samtools"]["time"]
+        runtime=15
     conda:
         "../envs/mapping.yml"
     script:
@@ -45,9 +45,9 @@ rule compress_resources:
         f"{resources.tegtf}.gz",
     params:
         pigz_options="",
-    threads: config["resources"]["mapping"]["cpu"]
+    threads: 4
     resources: 
-        runtime=config["resources"]["mapping"]["time"]
+        runtime=15
     log:
         "logs/resources/compress_resources.log"
     conda:

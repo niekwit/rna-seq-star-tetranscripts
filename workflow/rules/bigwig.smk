@@ -7,9 +7,9 @@ rule bam_to_bigwig:
     params:
         binsize=config["deeptools"]["binsize"],
         norm=config["deeptools"]["normalisation"],
-    threads: config["resources"]["deeptools"]["cpu"]
+    threads: 4
     resources:
-        runtime=config["resources"]["deeptools"]["time"],
+        runtime=30,
     log:
         "logs/deeptools/{sample}.log",
     conda:
