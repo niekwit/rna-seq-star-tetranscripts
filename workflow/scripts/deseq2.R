@@ -5,7 +5,6 @@ sink(log, type = "message")
 
 library(tidyverse)
 library(DESeq2)
-library(openxlsx)
 
 # Load Snakemake variables
 count.files <- snakemake@input[["counts"]]
@@ -216,7 +215,7 @@ names(df.list.genes) <- names.genes
 names.te <- lapply(df.list.te, function(x) unique(x$contrast_name))
 names(df.list.te) <- names.te
 
-# Write each df also to separate csv file
+# Write each df to separate csv file
 save2csv <- function(df.list, type){
   for (i in seq(df.list)) {
     # Check if df is empty
@@ -230,14 +229,6 @@ save2csv <- function(df.list, type){
 save2csv(df.list.genes, "_genes")
 save2csv(df.list.te, "_te")
 
-# Write output to file
-write.xlsx(df.list.genes, 
-           snakemake@output[["genes"]],
-           colNames = TRUE)
-
-write.xlsx(df.list.te,
-           snakemake@output[["te"]],
-           colNames = TRUE)
-
+# Close log
 sink(log, type = "output")
 sink(log, type = "message")

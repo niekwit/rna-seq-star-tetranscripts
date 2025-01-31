@@ -45,10 +45,9 @@ rule all:
     input: 
         "results/plots/mapping_rates.pdf",
         "results/plots/sample_distance.pdf",
-        "results/plots/volcano_genes/", #TO DO: use {comparison}
-        "results/plots/volcano_te/", #TO DO: use {comparison}
         "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
+        expand("results/deseq2/{comparison}_{type}.csv", comparison=COMPARISONS, type=["genes", "te"]),
         expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS)
 
 # Save snakemake terminal output to log file
