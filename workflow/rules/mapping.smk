@@ -40,9 +40,9 @@ rule star_index:
     params:
         sjdbOverhang="$(cat results/qc/readlength.txt)",
         extra="",
-    threads: config["resources"]["mapping"]["cpu"]
+    threads: 36
     resources:
-        runtime=config["resources"]["mapping"]["time"]
+        runtime=120,
     conda:
         "../envs/mapping.yml"
     log:
@@ -85,10 +85,11 @@ rule mapping:
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
         "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
     params:
+        prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
         extra=utils.star_arguments(config)
-    threads: config["resources"]["mapping"]["cpu"]
+    threads: 12
     resources:
-        runtime=config["resources"]["mapping"]["time"]
+        runtime=90
     conda:
         "../envs/mapping.yml"
     log:
@@ -100,12 +101,12 @@ rule mapping:
         "--genomeDir {input.idx} "
         "--readFilesIn {input.val1} {input.val2} "
         "--readFilesCommand zcat "
-        "--quantMode TranscriptomeSAM GeneCounts "
+        "--quantMode GeneCounts "
         "--twopassMode Basic "
         "--outSAMunmapped None "
         "--outSAMtype BAM SortedByCoordinate "
         "--outTmpDir temp_{wildcards.sample}/ "
-        "--outFileNamePrefix results/mapped/{wildcards.sample}/{wildcards.sample} "
+        "--outFileNamePrefix {params.prefix} "
         "{params.extra} "
         "> {log} 2>&1"
 
@@ -115,12 +116,11 @@ rule index_bam:
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
     output:
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
-    threads: config["resources"]["samtools"]["cpu"]
+    threads: 4
     resources:
-        runtime=config["resources"]["samtools"]["time"]
+        runtime=10
     log:
         "logs/samtools/index_{sample}.log"
     wrapper:
         "v5.5.1/bio/samtools/index"
-
 
