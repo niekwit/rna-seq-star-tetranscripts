@@ -50,21 +50,19 @@ rule heatmap_sample_distance:
 
 rule volcano_plot:
     input:
-        genes="results/deseq2/deseq2_genes.xlsx",
-        te="results/deseq2/deseq2_te.xlsx",
+        csv="results/deseq2/{comparison}_{type}.csv",
     output:
-        genes=report(directory("results/plots/volcano_genes/"), caption="report/volcano.rst", category="Volcano plots for genes"),
-        te=report(directory("results/plots/volcano_te/"), caption="report/volcano.rst", category="Volcano plots for TEs"),
+        pdf=report("results/plots/volcano/{comparison}_{type}.pdf", caption="report/volcano.rst", category="Volcano plots"),
     params:
         fdr=config["fdr_cutoff"],
-        fc=config["fc_cutoff"]
+        fc=config["fc_cutoff"],
     conda:
         "../envs/deseq2.yml"
-    threads: config["resources"]["plotting"]["cpu"]
+    threads: 1
     resources:
-        runtime=config["resources"]["plotting"]["time"]
+        runtime=10
     log:
-        "logs/plots/volcano.log"
+        "logs/plots/volcano_{comparison}_{type}.log"
     script:
         "../scripts/volcano.R"   
 
