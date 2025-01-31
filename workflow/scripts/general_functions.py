@@ -38,33 +38,23 @@ def comparisons():
     Create pairwise comparison strings from samples.csv
     """
     sample_info = pd.read_csv("config/samples.csv")
-    if len(sample_info["genotype"].unique()) > 1 and len(sample_info["treatment"].unique()) > 1:
-        # Combine genotype and treatment to get unique conditions
-        sample_info["condition"] = sample_info[["genotype","treatment"]].agg('_'.join, axis=1)
+    
+    # Combine genotype and treatment to get unique conditions
+    sample_info["condition"] = sample_info[["genotype","treatment"]].agg('_'.join, axis=1)
 
-        # Get reference conditions
-        reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
-        
-        # Get test conditions
-        test_conditions = sample_info[sample_info["reference"] != "yes"]["condition"].unique().tolist()
-    elif len(sample_info["genotype"].unique()) > 1 and len(sample_info["treatment"].unique()) == 1:
-        # Get reference conditions
-        reference_conditions = sample_info[sample_info["reference"] == "yes"]["genotype"].unique().tolist()
-
-        # Get test conditions
-        test_conditions = sample_info[sample_info["reference"] != "yes"]["genotype"].unique().tolist()
-    elif len(sample_info["genotype"].unique()) == 1 and len(sample_info["treatment"].unique()) > 1:
-        # Get reference conditions
-        reference_conditions = sample_info[sample_info["reference"] == "yes"]["treatment"].unique().tolist()
-
-        # Get test conditions
-        test_conditions = sample_info[sample_info["reference"] != "yes"]["treatment"].unique().tolist()
+    # Get reference conditions
+    reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
+    assert len(reference_conditions) > 0, "No reference conditions found"
+    
+    # Get test conditions
+    test_conditions = sample_info["condition"].unique().tolist()
     
     # Create strings for comparisons
     comparisons = []
     for test in test_conditions:
         for ref in reference_conditions:
-            comparisons.append(f"{test}_vs_{ref}")
+            if test != ref:
+                comparisons.append(f"{test}_vs_{ref}")
     
     return comparisons
 
