@@ -30,10 +30,10 @@ else:
         input:
             bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
         output:
-            bam=temp("results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chrom}.bam"),
-            idx=temp("results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chrom}.bam.bai"),
+            bam=temp("results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam"),
+            idx=temp("results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam.bai"),
         params:
-            region="{chrom}",
+            region=lambda wildcards: wildcards.chr,
             extra="-b",
         threads: 2
         resources:
@@ -44,8 +44,8 @@ else:
     
     rule TE_count:
         input:
-            bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chrom}.bam",
-            bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chrom}.bam.bai",
+            bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam",
+            bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam.bai",
             gtf=resources.gtf,
             te_gtf=resources.tegtf,
         params:
