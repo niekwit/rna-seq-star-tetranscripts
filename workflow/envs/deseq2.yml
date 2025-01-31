@@ -17,3 +17,4 @@ dependencies:
   - bioconductor-tximport=1.26.0
   - r-reshape2=1.4.4
   - bioconductor-limma=3.54.0
+  - conda-forge::icu=58.2
