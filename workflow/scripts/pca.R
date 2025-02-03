@@ -17,7 +17,13 @@ samples <- read.csv("config/samples.csv", header = TRUE)
 batches <- unique(samples$batch)
 
 # Extracting transformed values
-vsd <- vst(dds, blind = FALSE)
+if (length(dds) > 1000) {
+  vsd <- vst(dds, blind = FALSE)
+} else {
+  vsd <- varianceStabilizingTransformation(dds, 
+                                           blind = FALSE,
+                                           fitType = "mean")
+}
 
 # Remove batch effect if multiple batches are present
 if (length(unique(batches)) > 1) {
