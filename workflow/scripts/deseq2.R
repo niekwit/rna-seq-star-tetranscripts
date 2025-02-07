@@ -46,7 +46,7 @@ if (length(treatments) > 1) {
 # Check if batch column exists
 if ("batch" %in% colnames(samples)) {
   batches <- unique(samples$batch)
-  if (length(batches) > 1) {
+  if (length(batches) == 1) {
     batches <- 1
   } else {
     samples$batch <- as.factor(samples$batch)
