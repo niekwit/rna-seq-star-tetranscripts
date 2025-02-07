@@ -14,29 +14,3 @@ mapping: # STAR mapping parameters
 # This is recommended for running large datasets on a cluster
 split_bam: False
 
-deeptools:
-  normalisation: RPKM
-  binsize: 10
-
-resources: # computing resources
-  trim:
-    cpu: 8
-    time: 60
-  fastqc:
-    cpu: 4
-    time: 60
-  mapping:
-    cpu: 10
-    time: 120
-  samtools:
-    cpu: 4
-    time: 30
-  deeptools:
-    cpu: 6
-    time: 60
-  deseq2:
-    cpu: 6
-    time: 60 
-  plotting:
-    cpu: 2
-    time: 20
