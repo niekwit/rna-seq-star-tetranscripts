@@ -9,7 +9,7 @@ library(tidyverse)
 library(cowplot)
 
 # genes or te
-data.type <- snakemake@wilcard[["type"]]
+data.type <- snakemake@wildcards[["type"]]
 
 # Load DESeq2 output
 csv <- snakemake@input[["csv"]]
