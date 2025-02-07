@@ -8,6 +8,7 @@ library(DESeq2)
 library(RColorBrewer)
 library(ggrepel)
 library(cowplot)
+library(limma)
 
 # dds variable is loaded from deseq2.R
 load(snakemake@input[[1]])
