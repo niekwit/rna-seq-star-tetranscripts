@@ -1,5 +1,10 @@
 import pandas as pd
+import datetime
 import os
+from scripts.resources import Resources
+from scripts import general_functions as utils
+from snakemake.utils import min_version, validate
+
 
 def import_samples():
     csv = pd.read_csv("config/samples.csv")
@@ -39,8 +44,10 @@ def comparisons():
     """
     sample_info = pd.read_csv("config/samples.csv")
     
-    # Combine genotype and treatment to get unique conditions
-    sample_info["condition"] = sample_info[["genotype","treatment"]].agg('_'.join, axis=1)
+    if len(sample_info["treatment"].unique()) == 1:
+        sample_info["condition"] = sample_info["genotype"]
+    else:
+        sample_info["condition"] = sample_info[["genotype","treatment"]].agg('_'.join, axis=1)
 
     # Get reference conditions
     reference_conditions = sample_info[sample_info["reference"] == "yes"]["condition"].unique().tolist()
@@ -69,3 +76,47 @@ def get_chromosomes(genome):
         return [i for i in range(1,20)] + ["X", "Y"]
     else:
         raise ValueError(f"Genome {genome} not found")
+    
+    
+def mapping_input(wildcards):
+    """
+    Return the input files for mapping based on whether
+    spike-in should be applied or not.
+    """
+    base_idx = f"resources/{genome}_{resources.build}_index_star/"
+    
+    input_dict = {}
+    input_dict["idx"] = base_idx
+    
+    idx_files = [
+        "chrLength.txt", 
+        "chrNameLength.txt", 
+        "chrName.txt", 
+        "chrStart.txt", 
+        "exonGeTrInfo.tab", 
+        "exonInfo.tab",
+        "geneInfo.tab",
+        "Genome",
+        "genomeParameters.txt",
+        "Log.out",
+        "SA",
+        "SAindex",
+        "sjdbInfo.txt",
+        "sjdbList.fromGTF.out.tab",
+        "sjdbList.out.tab",
+        "transcriptInfo.tab"
+    ]
+    idx_files = [f"{base_idx}{i}" for i in idx_files]
+    input_dict["idx_files"] = idx_files
+    
+    if config["spike_in"]["apply"]:
+        val1 = "results/spike_in/{sample}_1.fq.gz"
+        val2 = "results/spike_in/{sample}_2.fq.gz"
+    else:
+        val1 = "results/trimmed/{sample}_val_1.fq.gz",
+        val2 = "results/trimmed/{sample}_val_2.fq.gz",
+        
+    input_dict["val1"] = val1
+    input_dict["val2"] = val2
+    
+    return input_dict
