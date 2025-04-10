@@ -9,6 +9,11 @@ library(DESeq2)
 # Load Snakemake variables
 count.files <- snakemake@input[["counts"]]
 genome <- snakemake@params[["genome"]]
+spikein <- snakemake@params[["spikein"]]
+spikein_name <- snakemake@params[["spikein_name"]]
+
+# Get gene annotation
+load(snakemake@input[["edb"]])
 
 # Use first count file as template for count matrix
 countMatrix <- read.delim(count.files[1]) 
@@ -31,6 +36,36 @@ countMatrix <- countMatrix[rowSums(countMatrix[,2:ncol(countMatrix)]) > 0,]
 # Create named index
 rownames(countMatrix) <- countMatrix$index
 countMatrix$index <- NULL
+
+### Check if spike-in needs to be applied to generate custom size factors
+if (spikein == "True") {
+  print("Calculating size factors using spike-in counts...")
+  is_spikein <- grepl(spikein_name, rownames(counts_matrix))
+
+  # Check if any spike-ins were found
+  if(length(is_spikein) == 0) {
+    stop(paste0("No spike-in identifiers found in rownames. Check your pattern(", spikein_name, ")"))
+  }
+
+  # Subset the matrix to get only spike-in counts
+  spikein_counts_matrix <- counts_matrix[is_spikein, ]
+
+  # Check for samples with zero total spike-in counts, which might cause issues
+  # print these samples
+  zero_spikein_samples <- colnames(spikein_counts_matrix)[colSums(spikein_counts_matrix) == 0]
+  if (length(zero_spikein_samples) > 0) {
+    print("WARNING: The following samples have zero total spike-in counts:")
+    for (i in seq(zero_spikein_samples)) {
+      print(zero_spikein_samples[i])
+    }
+  }
+
+  # Remove rows with zero counts for all samples
+  spikein_counts_matrix <- spikein_counts_matrix[rowSums(spikein_counts_matrix) > 0, ]
+
+  # Calculate size factors using ONLY the spike-in counts matrix
+  spikein_size_factors <- estimateSizeFactorsForMatrix(spikein_counts_matrix)
+}
 
 #### Load experiment information ####
 samples <- read.csv("config/samples.csv", header = TRUE)
@@ -67,6 +102,9 @@ if (length((all_samples)) != length(count.files)){
    }
   # Remove omitted samples from countMatrix
   countMatrix <- countMatrix[, colnames(countMatrix) %in% all_samples]
+
+  # Also remove omitted samples from spikein_size_factors if spike-in is applied
+  ###TO DO
 }
 
 # Create DESeq2 object
@@ -80,6 +118,22 @@ if (length(batches) == 1){
   dds <- DESeqDataSetFromMatrix(countData = countMatrix,
                               colData = samples,
                               design = ~batch + comb)
+}
+
+# Apply spike-in size factors if specified
+if (spikein == "True") {
+  print("Applying custom size factors to DESeq2 object...")
+  
+  # Check if sample order of spikein_size_factors matches the order of samples in dds
+  if (!all(colnames(spikein_counts_matrix) == colnames(dds))) {
+    stop("ERROR: Sample order of spikein_size_factors does not match the order of samples in dds.")
+  }
+  print("Size factors before spike-in correction:")
+  print(sizeFactors(dds))
+
+  sizeFactors(dds) <- spikein_size_factors
+  print("Size factors after spike-in correction:")
+  print(sizeFactors(dds))
 }
 
 # Save DESeqDataSet to file (input for other scripts)
@@ -114,9 +168,6 @@ if (grepl("hg", genome, fixed = TRUE)) {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
 }
 
-# Get gene annotation
-load(snakemake@input[["edb"]])
-
 # Remove duplicate lines
 gene.info <- gene.info[!duplicated(gene.info$ensembl_gene_id), ]
 
@@ -147,6 +198,11 @@ for (r in seq(references)) {
 
     df <- as.data.frame(res) %>%
       mutate(ensembl_gene_id = res@rownames, .before = 1)
+
+    # Remove spike-in genes (if any)
+    if (spikein == "True") {
+      df <- df[!grepl(spikein_name, df$ensembl_gene_id), ]
+    }
 
     # Get non-TE genes
     if (grepl("hg",genome) ==TRUE) {
@@ -229,6 +285,5 @@ save2csv <- function(df.list, type){
 save2csv(df.list.genes, "_genes")
 save2csv(df.list.te, "_te")
 
-# Close log
 sink(log, type = "output")
 sink(log, type = "message")

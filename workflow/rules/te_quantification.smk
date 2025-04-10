@@ -46,7 +46,7 @@ else:
         input:
             bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam",
             bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out_chr_{chr}.bam.bai",
-            gtf=resources.gtf,
+            gtf=index_resource("gtf"),
             te_gtf=resources.tegtf,
         params:
             strand=config["strand"]

@@ -25,7 +25,9 @@ rule deseq2:
         te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS)
     params:
         strand=config["strand"],
-        genome=resources.genome
+        genome=resources.genome,
+        spikein=config["spike_in"]["apply"],
+        spikein_name=config["spike_in"]["name"],
     threads: 4
     resources:
         runtime=90

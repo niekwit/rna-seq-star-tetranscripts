@@ -2,7 +2,6 @@ import pandas as pd
 import datetime
 import os
 from scripts.resources import Resources
-from scripts import general_functions as utils
 from snakemake.utils import min_version, validate
 
 
@@ -120,3 +119,28 @@ def mapping_input(wildcards):
     input_dict["val2"] = val2
     
     return input_dict
+
+
+def check_spike_in_resources():
+    if not os.path.isfile(config["spike_in"]["fasta"]):
+        raise ValueError(f"Spike-in fasta file {config['spike_in']['fasta']} not found")
+    if not os.path.isfile(config["spike_in"]["gtf"]):
+        raise ValueError(f"Spike-in gtf file {config['spike_in']['gtf']} not found")
+
+
+def index_resource(format):
+    """
+    Return fasta/gtf file for indexing:
+        - If spike-in is applied, return combined fasta/gtf file
+        - If not, return genome fasta/gtf file
+    """
+    if config["spike_in"]["apply"]:
+        if format == "fasta":
+            return "resources/combined.fasta"
+        elif format == "gtf":
+            return "resources/combined.gtf"
+    else:
+        if format == "fasta":
+            return resources.fasta
+        elif format == "gtf":
+            return resources.gtf

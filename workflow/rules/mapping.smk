@@ -15,8 +15,8 @@ rule get_readlength:
 
 rule star_index:
     input:
-        fasta=resources.fasta,
-        gtf=resources.gtf,
+        fasta=index_resource("fasta"),
+        gtf=index_resource("gtf"),
         rl="results/qc/readlength.txt",
     output:
         directory=directory(f"resources/{resources.genome}_{resources.build}_index_star/"),
@@ -86,7 +86,7 @@ rule mapping:
         "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
     params:
         prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
-        extra=utils.star_arguments(config)
+        extra=star_arguments(config)
     threads: 12
     resources:
         runtime=90
