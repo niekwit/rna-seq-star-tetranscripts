@@ -26,6 +26,24 @@ properties:
     type: number
     description: "Log2 fold change cutoff for volcano plots"
     default: 0.5
+  
+  spike_in:
+    type: object
+    description: "Spike-in correction parameters"
+    properties:
+      apply:
+        type: boolean
+        description: "Whether to apply spike-in correction"
+      name:
+        type: string
+        description: "Pattern for spike-in names"
+      gtf:
+        type: string
+        description: "Path to the GTF file for spike-ins"
+      fasta:
+        type: string
+        description: "Path to the FASTA file for spike-ins"
+
   mapping:
     type: object
     description: "STAR mapping parameters"
@@ -40,6 +58,7 @@ properties:
         type: string
         description: "Additional arguments to pass to STAR"
         default: ""
+  
   deeptools:
     type: object
     description: "DeepTools parameters"
@@ -53,6 +72,7 @@ properties:
         type: integer
         description: "Bin size for DeepTools"
         default: 10
+  
   resources:
     type: object
     description: "Computing resources for different steps"
