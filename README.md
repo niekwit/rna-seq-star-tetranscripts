@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-≥6.3.0-brightgreen.svg)](https://snakemake.github.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.25.5-brightgreen.svg)](https://snakemake.github.io)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10211476.svg)](https://doi.org/10.5281/zenodo.10211476)
 [![Tests](https://github.com/niekwit/rna-seq-star-tetranscripts/actions/workflows/main.yml/badge.svg)](https://github.com/niekwit/rna-seq-star-tetranscripts/actions/workflows/main.yml)
 
