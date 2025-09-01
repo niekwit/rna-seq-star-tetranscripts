@@ -66,6 +66,7 @@ class Resources:
         self.fasta = self._file_from_url(self.fasta_url)
         self.gtf = self._file_from_url(self.gtf_url)
         self.tegtf = self._file_from_url(self.tegtf_url)
+        self.tegtf = self.tegtf.replace("?rlkey=41oz6ppggy82uha5i3yo1rnlx&dl=1", "")
 
     def _file_from_url(self, url):
         """Returns file path for unzipped downloaded file"""
