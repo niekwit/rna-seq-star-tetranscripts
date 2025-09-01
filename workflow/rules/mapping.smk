@@ -43,6 +43,7 @@ rule star_index:
     threads: 36
     resources:
         runtime=120,
+        mem_mb=60000,
     conda:
         "../envs/mapping.yml"
     log:
@@ -58,57 +59,108 @@ rule star_index:
         "--genomeDir {output.directory} "  # Path to output
         "> {log} 2>&1"  # Logging
 
-
-rule mapping: 
-    input:
-        val1="results/trimmed/{sample}_val_1.fq.gz",
-        val2="results/trimmed/{sample}_val_2.fq.gz",
-        idx=f"resources/{resources.genome}_{resources.build}_index_star/",
-        idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
-        "chrNameLength.txt", 
-        "chrName.txt", 
-        "chrStart.txt", 
-        "exonGeTrInfo.tab", 
-        "exonInfo.tab",
-        "geneInfo.tab",
-        "Genome",
-        "genomeParameters.txt",
-        "Log.out",
-        "SA",
-        "SAindex",
-        "sjdbInfo.txt",
-        "sjdbList.fromGTF.out.tab",
-        "sjdbList.out.tab",
-        "transcriptInfo.tab"),
-    output:
-        "results/mapped/{sample}/{sample}Log.final.out",
-        "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
-        "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
-    params:
-        prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
-        extra=star_arguments(config)
-    threads: 12
-    resources:
-        runtime=90
-    conda:
-        "../envs/mapping.yml"
-    log:
-        "logs/mapping/{sample}.log"
-    shell:
-        "rm -rf temp_{wildcards.sample}/ && " # make sure temp dir is not present
-        "STAR --runThreadN {threads} "
-        "--runMode alignReads "
-        "--genomeDir {input.idx} "
-        "--readFilesIn {input.val1} {input.val2} "
-        "--readFilesCommand zcat "
-        "--quantMode GeneCounts "
-        "--twopassMode Basic "
-        "--outSAMunmapped None "
-        "--outSAMtype BAM SortedByCoordinate "
-        "--outTmpDir temp_{wildcards.sample}/ "
-        "--outFileNamePrefix {params.prefix} "
-        "{params.extra} "
-        "> {log} 2>&1"
+if PAIRED_END:
+    rule mapping: 
+        input:
+            val1="results/trimmed/{sample}_val_1.fq.gz",
+            val2="results/trimmed/{sample}_val_2.fq.gz",
+            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+            idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
+            "chrNameLength.txt", 
+            "chrName.txt", 
+            "chrStart.txt", 
+            "exonGeTrInfo.tab", 
+            "exonInfo.tab",
+            "geneInfo.tab",
+            "Genome",
+            "genomeParameters.txt",
+            "Log.out",
+            "SA",
+            "SAindex",
+            "sjdbInfo.txt",
+            "sjdbList.fromGTF.out.tab",
+            "sjdbList.out.tab",
+            "transcriptInfo.tab"),
+        output:
+            "results/mapped/{sample}/{sample}Log.final.out",
+            "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
+            "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
+        params:
+            prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
+            extra=star_arguments(config)
+        threads: 12
+        resources:
+            runtime=90
+        conda:
+            "../envs/mapping.yml"
+        log:
+            "logs/mapping/{sample}.log"
+        shell:
+            "rm -rf temp_{wildcards.sample}/ && " # make sure temp dir is not present
+            "STAR --runThreadN {threads} "
+            "--runMode alignReads "
+            "--genomeDir {input.idx} "
+            "--readFilesIn {input.val1} {input.val2} "
+            "--readFilesCommand zcat "
+            "--quantMode GeneCounts "
+            "--twopassMode Basic "
+            "--outSAMunmapped None "
+            "--outSAMtype BAM SortedByCoordinate "
+            "--outTmpDir temp_{wildcards.sample}/ "
+            "--outFileNamePrefix {params.prefix} "
+            "{params.extra} "
+            "> {log} 2>&1"
+else:
+    rule mapping: 
+        input:
+            fastq="results/trimmed/{sample}.fq.gz",
+            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+            idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
+            "chrNameLength.txt", 
+            "chrName.txt", 
+            "chrStart.txt", 
+            "exonGeTrInfo.tab", 
+            "exonInfo.tab",
+            "geneInfo.tab",
+            "Genome",
+            "genomeParameters.txt",
+            "Log.out",
+            "SA",
+            "SAindex",
+            "sjdbInfo.txt",
+            "sjdbList.fromGTF.out.tab",
+            "sjdbList.out.tab",
+            "transcriptInfo.tab"),
+        output:
+            "results/mapped/{sample}/{sample}Log.final.out",
+            "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
+            "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
+        params:
+            prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
+            extra=star_arguments(config)
+        threads: 12
+        resources:
+            runtime=90
+        conda:
+            "../envs/mapping.yml"
+        log:
+            "logs/mapping/{sample}.log"
+        shell:
+            "rm -rf temp_{wildcards.sample}/ && " # make sure temp dir is not present
+            "STAR --runThreadN {threads} "
+            "--runMode alignReads "
+            "--genomeDir {input.idx} "
+            "--readFilesIn {input.fastq} "
+            "--readFilesCommand zcat "
+            "--quantMode GeneCounts "
+            "--twopassMode Basic "
+            "--outSAMunmapped None "
+            "--outSAMtype BAM SortedByCoordinate "
+            "--outTmpDir temp_{wildcards.sample}/ "
+            "--outFileNamePrefix {params.prefix} "
+            "{params.extra} "
+            "> {log} 2>&1"
+        
 
 
 rule index_bam:
