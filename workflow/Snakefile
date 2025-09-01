@@ -23,7 +23,8 @@ genome = config["genome"]
 resources = Resources(genome, config["ensembl_genome_build"])
 
 # Get sample names
-SAMPLES = import_samples()
+PAIRED_END = paired_end()
+SAMPLES = import_samples(PAIRED_END)
 COMPARISONS = comparisons()
 CHROMOSOMES = get_chromosomes(genome)
 
