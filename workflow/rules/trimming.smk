@@ -1,6 +1,5 @@
 if PAIRED_END:
     rule trim_galore_pe:
-        message: "Paired-end samples detected"
         input:
             ["reads/{sample}_R1_001.fastq.gz","reads/{sample}_R2_001.fastq.gz"],
         output:
@@ -17,7 +16,6 @@ if PAIRED_END:
             "v5.5.1/bio/trim_galore/pe"
 else:
     rule trim_galore_se:
-        message: "Single-end samples detected"
         input:
             "reads/{sample}.fastq.gz",
         output:
