@@ -1,5 +1,5 @@
 # Redirect R output to log
-log <- file(snakemake@log[[1]], open="wt")
+log <- file(snakemake@log[[1]], open = "wt")
 sink(log, type = "output")
 sink(log, type = "message")
 
@@ -21,9 +21,7 @@ batches <- unique(samples$batch)
 if (length(dds) > 1000) {
   vsd <- vst(dds, blind = FALSE)
 } else {
-  vsd <- varianceStabilizingTransformation(dds, 
-                                           blind = FALSE,
-                                           fitType = "mean")
+  vsd <- varianceStabilizingTransformation(dds, blind = FALSE, fitType = "mean")
 }
 
 # Remove batch effect if multiple batches are present
@@ -31,11 +29,11 @@ if (length(unique(batches)) > 1) {
   print("Removing batch effect from data...")
   mat <- assay(vsd)
   mm <- model.matrix(~comb, colData(vsd))
-  mat <- limma::removeBatchEffect(mat, 
-                                  batch = vsd$batch, 
-                                  design = mm)
+  mat <- limma::removeBatchEffect(mat, batch = vsd$batch, design = mm)
   assay(vsd) <- mat
-} else {print("No correction for batch effect...")}
+} else {
+  print("No correction for batch effect...")
+}
 
 # Select colours and shapes for plotting
 shapes <- c(16, 15, 17, 18, 1, 0, 2, 5, 6, 3, 4, 7, 8, 9, 10)
@@ -54,13 +52,13 @@ rv <- rowVars(assay(vsd))
 
 # Select the ntop genes by variance
 ntop <- 500
-select <- order(rv, decreasing=TRUE)[seq_len(min(ntop, length(rv)))]
+select <- order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
 
 # Perform a PCA on the data in assay(x) for the selected genes
-pca <- prcomp(t(assay(vsd)[select,]))
+pca <- prcomp(t(assay(vsd)[select, ]))
 
 # The contribution to the total variance for each component
-percentVar <- pca$sdev^2 / sum( pca$sdev^2 )
+percentVar <- pca$sdev^2 / sum(pca$sdev^2)
 
 # Prepare data frame for plotting
 df <- pca$x[, 1:2] %>%
@@ -68,25 +66,19 @@ df <- pca$x[, 1:2] %>%
   rownames_to_column(var = "sample") %>%
   left_join(samples, by = "sample")
 
-p <- ggplot(df, 
-            aes(x = PC1, 
-                y = PC2, 
-                color = treatment, 
-                shape = genotype)) +
+p <- ggplot(df, aes(x = PC1, y = PC2, color = treatment, shape = genotype)) +
   geom_point(size = 8) +
-  geom_text_repel(aes(label = sample), 
-                  size = 4) +
+  geom_text_repel(aes(label = sample), size = 4) +
   theme_cowplot(18) +
   scale_color_brewer(palette = palette) +
   scale_shape_manual(values = shapes) +
-  labs(x = paste0("PC1 (", round(percentVar[1], 3) * 100, "% variance)"),
-       y = paste0("PC2 (", round(percentVar[2], 3) * 100, "% variance)"))
+  labs(
+    x = paste0("PC1 (", round(percentVar[1], 3) * 100, "% variance)"),
+    y = paste0("PC2 (", round(percentVar[2], 3) * 100, "% variance)")
+  )
 
 # Save plot to file
-ggsave(snakemake@output[[1]], 
-       p, 
-       width=10,
-       height=10)
+ggsave(snakemake@output[[1]], p, width = 10, height = 10)
 
 # Close redirection of output/messages
 sink(log, type = "output")
