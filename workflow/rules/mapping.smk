@@ -43,7 +43,6 @@ rule star_index:
     threads: 36
     resources:
         runtime=120,
-        mem_mb=60000,
     conda:
         "../envs/mapping.yml"
     log:
