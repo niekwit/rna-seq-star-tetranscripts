@@ -6,8 +6,8 @@ fdr_cutoff: 0.05 # cut off for volcano plots
 fc_cutoff: 0.5 # log2 fold change cut off for volcano plots
 
 spike_in:
-  apply: True # whether to apply spike-in correction
-  name: ERCC-[0-9]{5} # pattern for spike-in names
+  apply: False # whether to apply spike-in correction
+  name: ERCC- # pattern for spike-in names
   gtf: /path/to/ERCC.gtf
   fasta: /path/to/ERCC.fasta
 
