@@ -125,7 +125,8 @@ if PAIRED_END:
             "--outTmpDir temp_{wildcards.sample}/ "
             "--outFileNamePrefix {params.prefix} "
             "{params.extra} "
-            "> {log} 2>&1"  # make sure temp dir is not present
+            "> {log} 2>&1"
+            # make sure temp dir is not present
 
 else:
 
@@ -180,7 +181,8 @@ else:
             "--outTmpDir temp_{wildcards.sample}/ "
             "--outFileNamePrefix {params.prefix} "
             "{params.extra} "
-            "> {log} 2>&1"  # make sure temp dir is not present
+            "> {log} 2>&1"
+            # make sure temp dir is not present
 
 
 rule index_bam:
