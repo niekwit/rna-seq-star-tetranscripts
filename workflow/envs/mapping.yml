@@ -7,3 +7,4 @@ dependencies:
   - star=2.7.11a
   - pigz=2.8
   - multiqc=1.19
+  - curl
