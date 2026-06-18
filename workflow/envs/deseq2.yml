@@ -1,5 +1,5 @@
 name: deseq2
-channels: 
+channels:
   - conda-forge
   - bioconda
   - defaults
@@ -15,4 +15,5 @@ dependencies:
   - bioconductor-tximport=1.30
   - r-reshape2=1.4.4
   - bioconductor-limma=3.58.1
+  - conda-forge::curl=8.20
 #  - conda-forge::icu=75.1
