@@ -7,8 +7,8 @@ The Docker image derived from this file contains all Conda environments for each
 These images are shared via [Docker Hub](https://hub.docker.com/repository/docker/niekwit/rna-seq-star-tetranscripts/general) and are generated as follows (from directory with workflow code):
 
 ```shell
-$ snakemake --containerize > Dockerfile
-$ docker build -t niekwit/rna-seq-star-tetranscripts:v0.5.0 .
-$ docker login
-$ docker push niekwit/rna-seq-star-tetranscripts:v0.5.0
+snakemake --containerize > Dockerfile
+docker build -t niekwit/rna-seq-star-tetranscripts:v0.6.0 .
+docker login
+docker push niekwit/rna-seq-star-tetranscripts:v0.6.0
 ```
