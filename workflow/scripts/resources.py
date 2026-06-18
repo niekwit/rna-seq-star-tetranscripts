@@ -13,7 +13,6 @@ class Resources:
 
         # base URLs
         base_url_ens = f"https://ftp.ensembl.org/pub/release-{build}/"
-        base_url_te = "https://labshare.cshl.edu/shares/mhammelllab/www-data/TEtranscripts/TE_GTF/"
 
         if "hg" in genome:
             if genome == "hg19":
@@ -30,7 +29,6 @@ class Resources:
             self.gtf_url = (
                 f"{base_url_ens}gtf/homo_sapiens/Homo_sapiens.{name}.{build}.gtf.gz"
             )
-            self.tegtf_url = f"{base_url_te}{name}_Ensembl_rmsk_TE.gtf.gz"
 
         elif "mm" in genome:
             if genome == "mm38":
