@@ -48,12 +48,18 @@ ngs_tracker:
     - path: "config/config.yaml"
       type: config
       description: "Workflow config"
-    - path: "results/qc/multiqc.html"
+    - path: "results/qc/multiqc/multiqc.html"
       type: qc
       description: "MultiQC report"
-    - path: "results/qc/mapping_rates.csv"
+    - path: "results/plots/mapping_rates.csv"
       type: mapping_rates
-    - path: "results/qc/*.pdf"
+    - path: "results/plots/*.pdf"
       type: qc
     - path: logs/snakemake/*.log
       type: snakemake_log
+    - path: "results/plots/te_classes/*.pdf"
+      type: results
+      description: "TE class plots"
+    - path: "results/plots/volcano/*.pdf"
+      type: results
+      description: "Volcano plots"
