@@ -4,7 +4,7 @@ include: "scripts/general_functions.smk"
 min_version("8.25.5")
 
 # Workflow version
-VERSION = "v0.4.0"
+VERSION = "v0.6.0"
 
 # Load config file
 configfile: "config/config.yaml"
@@ -42,6 +42,7 @@ include: "rules/bigwig.smk"
 rule all:
     input: 
         "results/plots/mapping_rates.pdf",
+        "results/plots/mapping_rates.csv",
         "results/plots/sample_distance.pdf",
         "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
@@ -57,6 +58,26 @@ onsuccess:
     shell("cp -v {log} {snake_log}")
     print("Analysis finished successfully!")
 
+    try:
+        from ngs_tracker import register_run
+
+        register_run(config)
+    except ImportError:
+        pass
+
+    except Exception as exc:
+        logger.warning(f"NGS Tracker registration skipped: {exc}")
+
 onerror:
     shell("cp -v {log} {snake_log}")
     print(f"Analysis failed...\nCheck {snake_log} for details")
+
+    try:
+        from ngs_tracker import register_run
+
+        register_run(config, status="failed", log_file=log)
+    except ImportError:
+        pass
+
+    except Exception as exc:
+        logger.warning(f"NGS Tracker registration skipped: {exc}")
