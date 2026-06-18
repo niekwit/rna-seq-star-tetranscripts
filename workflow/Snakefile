@@ -1,13 +1,16 @@
 include: "scripts/general_functions.smk"
 
+
 # Set minimum snakemake version
 min_version("8.25.5")
 
 # Workflow version
 VERSION = "v0.6.0"
 
+
 # Load config file
 configfile: "config/config.yaml"
+
 
 # Wrapper version
 wrapper_version = "v5.5.1"
@@ -15,8 +18,10 @@ wrapper_version = "v5.5.1"
 logger.info(f"Workflow version: {VERSION}")
 logger.info(f"Wrapper version: {wrapper_version}")
 
+
 # Define Docker container for Apptainer usage
 containerized: f"docker://niekwit/rna-seq-star-tetranscripts:{VERSION}"
+
 
 # Load resources to be used in rules
 genome = config["genome"]
@@ -28,6 +33,7 @@ SAMPLES = import_samples(PAIRED_END)
 COMPARISONS = comparisons()
 CHROMOSOMES = get_chromosomes(genome)
 
+
 # Import rules
 include: "rules/fastqc.smk"
 include: "rules/trimming.smk"
@@ -38,23 +44,30 @@ include: "rules/deseq2.smk"
 include: "rules/plotting.smk"
 include: "rules/bigwig.smk"
 
+
 # Target rule
 rule all:
-    input: 
+    input:
         "results/plots/mapping_rates.pdf",
         "results/plots/mapping_rates.csv",
         "results/plots/sample_distance.pdf",
         "results/plots/pca.pdf",
         expand("results/bigwig/{sample}.bw", sample=SAMPLES),
-        expand("results/plots/volcano/{comparison}_{type}.pdf", comparison=COMPARISONS, type=["genes", "te"]),
-        expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS)
+        expand(
+            "results/plots/volcano/{comparison}_{type}.pdf",
+            comparison=COMPARISONS,
+            type=["genes", "te"],
+        ),
+        expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS),
+
 
 # Save snakemake terminal output to log file
 time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 snake_log = f"logs/snakemake/{time}_snakemake.log"
 os.makedirs("logs/snakemake", exist_ok=True)
 
-onsuccess: 
+
+onsuccess:
     shell("cp -v {log} {snake_log}")
     print("Analysis finished successfully!")
 
@@ -67,6 +80,7 @@ onsuccess:
 
     except Exception as exc:
         logger.warning(f"NGS Tracker registration skipped: {exc}")
+
 
 onerror:
     shell("cp -v {log} {snake_log}")

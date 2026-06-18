@@ -1,16 +1,20 @@
 rule plot_mapping_rates:
     input:
-        expand("results/mapped/{sample}/{sample}Log.final.out", sample=SAMPLES)
+        expand("results/mapped/{sample}/{sample}Log.final.out", sample=SAMPLES),
     output:
-        report("results/plots/mapping_rates.pdf", caption="report/mapping_rates.rst", category="Mapping rates"),
-        csv="results/plots/mapping_rates.csv"
+        report(
+            "results/plots/mapping_rates.pdf",
+            caption="report/mapping_rates.rst",
+            category="Mapping rates",
+        ),
+        csv="results/plots/mapping_rates.csv",
     conda:
         "../envs/deseq2.yml"
     threads: 1
     resources:
-        runtime=5
+        runtime=5,
     log:
-        "logs/plots/mapping_rates.log"
+        "logs/plots/mapping_rates.log",
     script:
         "../scripts/mapping_rates.R"
 
@@ -24,9 +28,9 @@ rule plot_pca:
         "../envs/deseq2.yml"
     threads: 2
     resources:
-        runtime=10
+        runtime=10,
     log:
-        "logs/plots/pca.log"
+        "logs/plots/pca.log",
     script:
         "../scripts/pca.R"
 
@@ -35,16 +39,20 @@ rule plot_sample_distance:
     input:
         "results/deseq2/dds.RData",
     output:
-        report("results/plots/sample_distance.pdf", caption="report/sample_distance.rst", category="Sample distances"),
+        report(
+            "results/plots/sample_distance.pdf",
+            caption="report/sample_distance.rst",
+            category="Sample distances",
+        ),
     params:
         genome=resources.genome,
     conda:
         "../envs/deseq2.yml"
     threads: 1
     resources:
-        runtime=10
+        runtime=10,
     log:
-        "logs/plots/sample_distance.log"
+        "logs/plots/sample_distance.log",
     script:
         "../scripts/heatmap_sd.R"
 
@@ -53,7 +61,11 @@ rule plot_volcano:
     input:
         csv="results/deseq2/{comparison}_{type}.csv",
     output:
-        pdf=report("results/plots/volcano/{comparison}_{type}.pdf", caption="report/volcano.rst", category="Volcano plots"),
+        pdf=report(
+            "results/plots/volcano/{comparison}_{type}.pdf",
+            caption="report/volcano.rst",
+            category="Volcano plots",
+        ),
     params:
         fdr=config["fdr_cutoff"],
         fc=config["fc_cutoff"],
@@ -61,28 +73,33 @@ rule plot_volcano:
         "../envs/deseq2.yml"
     threads: 1
     resources:
-        runtime=10
+        runtime=10,
     log:
-        "logs/plots/volcano_{comparison}_{type}.log"
+        "logs/plots/volcano_{comparison}_{type}.log",
     script:
-        "../scripts/volcano.R"   
+        "../scripts/volcano.R"
 
 
 rule plot_te_classes:
     input:
-        te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS)
+        te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS),
     output:
-        pdf=report(expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS), caption="report/te_classes.rst", category="TE classes"),
+        pdf=report(
+            expand(
+                "results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS
+            ),
+            caption="report/te_classes.rst",
+            category="TE classes",
+        ),
     params:
         fdr=config["fdr_cutoff"],
-        lfc=config["fc_cutoff"]
+        lfc=config["fc_cutoff"],
     conda:
         "../envs/deseq2.yml"
     threads: 1
     resources:
-        runtime=15
+        runtime=15,
     log:
-        "logs/plots/te_classes.log"
+        "logs/plots/te_classes.log",
     script:
         "../scripts/te_classes.R"
-

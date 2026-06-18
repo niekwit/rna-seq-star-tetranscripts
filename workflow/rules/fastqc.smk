@@ -1,25 +1,29 @@
 if PAIRED_END:
+
     rule fastqc:
         input:
-            "reads/{sample}{end}.fastq.gz"
+            "reads/{sample}{end}.fastq.gz",
         output:
             html="results/qc/fastqc/{sample}{end}.html",
-            zip="results/qc/fastqc/{sample}{end}_fastqc.zip"
+            zip="results/qc/fastqc/{sample}{end}_fastqc.zip",
         params:
-            extra = "--quiet"
+            extra="--quiet",
         log:
-            "logs/fastqc/{sample}{end}.log"
+            "logs/fastqc/{sample}{end}.log",
         threads: 4
         resources:
             runtime=20,
-            mem_mb = 2048
+            mem_mb=2048,
         wrapper:
             "v5.5.1/bio/fastqc"
 
-
-    rule multiqc: 
+    rule multiqc:
         input:
-            expand("results/qc/fastqc/{sample}{end}_fastqc.zip", sample=SAMPLES, end=["_R1_001","_R2_001"])
+            expand(
+                "results/qc/fastqc/{sample}{end}_fastqc.zip",
+                sample=SAMPLES,
+                end=["_R1_001", "_R2_001"],
+            ),
         output:
             r="results/qc/multiqc/multiqc.html",
             d=directory("results/qc/multiqc/"),
@@ -27,42 +31,43 @@ if PAIRED_END:
         params:
             extra="",  # Optional: extra parameters for multiqc
         log:
-            "logs/multiqc/multiqc.log"
+            "logs/multiqc/multiqc.log",
         threads: 1
         resources:
-            runtime=15
+            runtime=15,
         conda:
             "../envs/mapping.yml"
         shell:
-            "multiqc " 
+            "multiqc "
             "--force "
             "--outdir {output.d} "
             "-n multiqc.html "
             "{params.extra} "
             "{input} "
             "> {log} 2>&1"
+
 else:
+
     rule fastqc:
         input:
-            "reads/{sample}.fastq.gz"
+            "reads/{sample}.fastq.gz",
         output:
             html="results/qc/fastqc/{sample}.html",
-            zip="results/qc/fastqc/{sample}_fastqc.zip"
+            zip="results/qc/fastqc/{sample}_fastqc.zip",
         params:
-            extra = "--quiet"
+            extra="--quiet",
         log:
-            "logs/fastqc/{sample}.log"
+            "logs/fastqc/{sample}.log",
         threads: 4
         resources:
             runtime=20,
-            mem_mb = 2048
+            mem_mb=2048,
         wrapper:
             "v5.5.1/bio/fastqc"
 
-
-    rule multiqc: 
+    rule multiqc:
         input:
-            expand("results/qc/fastqc/{sample}_fastqc.zip", sample=SAMPLES)
+            expand("results/qc/fastqc/{sample}_fastqc.zip", sample=SAMPLES),
         output:
             r="results/qc/multiqc/multiqc.html",
             d=directory("results/qc/multiqc/"),
@@ -70,14 +75,14 @@ else:
         params:
             extra="",  # Optional: extra parameters for multiqc
         log:
-            "logs/multiqc/multiqc.log"
+            "logs/multiqc/multiqc.log",
         threads: 1
         resources:
-            runtime=15
+            runtime=15,
         conda:
             "../envs/mapping.yml"
         shell:
-            "multiqc " 
+            "multiqc "
             "--force "
             "--outdir {output.d} "
             "-n multiqc.html "

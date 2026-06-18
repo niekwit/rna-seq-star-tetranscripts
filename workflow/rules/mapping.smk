@@ -1,4 +1,4 @@
-rule get_readlength:  
+rule get_readlength:
     input:
         r="results/qc/multiqc/multiqc.html",
         d="results/qc/multiqc/",
@@ -8,7 +8,7 @@ rule get_readlength:
     conda:
         "../envs/mapping.yml"
     log:
-        "logs/mapping/readlength.log"
+        "logs/mapping/readlength.log",
     script:
         "../scripts/get_readlength.sh"
 
@@ -19,56 +19,16 @@ rule star_index:
         gtf=index_resource("gtf"),
         rl="results/qc/readlength.txt",
     output:
-        directory=directory(f"resources/{resources.genome}_{resources.build}_index_star/"),
-        files=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
-        "chrNameLength.txt", 
-        "chrName.txt", 
-        "chrStart.txt", 
-        "exonGeTrInfo.tab", 
-        "exonInfo.tab",
-        "geneInfo.tab",
-        "Genome",
-        "genomeParameters.txt",
-        "Log.out",
-        "SA",
-        "SAindex",
-        "sjdbInfo.txt",
-        "sjdbList.fromGTF.out.tab",
-        "sjdbList.out.tab",
-        "transcriptInfo.tab"),
-    #cache: True
-    params:
-        sjdbOverhang="$(cat results/qc/readlength.txt)",
-        extra="",
-    threads: 36
-    resources:
-        runtime=120,
-    conda:
-        "../envs/mapping.yml"
-    log:
-        "logs/index/star.log"
-    shell:
-        "STAR "
-        "--runThreadN {threads} "  # Number of threads
-        "--runMode genomeGenerate "  # Indexation mode
-        "--genomeFastaFiles {input.fasta} "  # Path to fasta files
-        "--sjdbOverhang {params.sjdbOverhang} "  # Read-len - 1
-        "--sjdbGTFfile {input.gtf} "
-        "{params.extra} "  # Optional parameters
-        "--genomeDir {output.directory} "  # Path to output
-        "> {log} 2>&1"  # Logging
-
-if PAIRED_END:
-    rule mapping: 
-        input:
-            val1="results/trimmed/{sample}_val_1.fq.gz",
-            val2="results/trimmed/{sample}_val_2.fq.gz",
-            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
-            idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
-            "chrNameLength.txt", 
-            "chrName.txt", 
-            "chrStart.txt", 
-            "exonGeTrInfo.tab", 
+        directory=directory(
+            f"resources/{resources.genome}_{resources.build}_index_star/"
+        ),
+        files=multiext(
+            f"resources/{resources.genome}_{resources.build}_index_star/",
+            "chrLength.txt",
+            "chrNameLength.txt",
+            "chrName.txt",
+            "chrStart.txt",
+            "exonGeTrInfo.tab",
             "exonInfo.tab",
             "geneInfo.tab",
             "Genome",
@@ -79,23 +39,80 @@ if PAIRED_END:
             "sjdbInfo.txt",
             "sjdbList.fromGTF.out.tab",
             "sjdbList.out.tab",
-            "transcriptInfo.tab"),
+            "transcriptInfo.tab",
+        ),
+    # cache: True
+    params:
+        sjdbOverhang="$(cat results/qc/readlength.txt)",
+        extra="",
+    threads: 36
+    resources:
+        runtime=120,
+    conda:
+        "../envs/mapping.yml"
+    log:
+        "logs/index/star.log",
+    shell:
+        "STAR "
+        "--runThreadN {threads} "
+        "--runMode genomeGenerate "
+        "--genomeFastaFiles {input.fasta} "
+        "--sjdbOverhang {params.sjdbOverhang} "
+        "--sjdbGTFfile {input.gtf} "
+        "{params.extra} "
+        "--genomeDir {output.directory} "
+        "> {log} 2>&1"
+        # Number of threads
+        # Indexation mode
+        # Path to fasta files
+        # Read-len - 1
+        # Optional parameters
+        # Path to output
+        # Logging
+
+
+if PAIRED_END:
+
+    rule mapping:
+        input:
+            val1="results/trimmed/{sample}_val_1.fq.gz",
+            val2="results/trimmed/{sample}_val_2.fq.gz",
+            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+            idxfiles=multiext(
+                f"resources/{resources.genome}_{resources.build}_index_star/",
+                "chrLength.txt",
+                "chrNameLength.txt",
+                "chrName.txt",
+                "chrStart.txt",
+                "exonGeTrInfo.tab",
+                "exonInfo.tab",
+                "geneInfo.tab",
+                "Genome",
+                "genomeParameters.txt",
+                "Log.out",
+                "SA",
+                "SAindex",
+                "sjdbInfo.txt",
+                "sjdbList.fromGTF.out.tab",
+                "sjdbList.out.tab",
+                "transcriptInfo.tab",
+            ),
         output:
             "results/mapped/{sample}/{sample}Log.final.out",
             "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
             "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
         params:
             prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
-            extra=star_arguments(config)
+            extra=star_arguments(config),
         threads: 12
         resources:
-            runtime=90
+            runtime=90,
         conda:
             "../envs/mapping.yml"
         log:
-            "logs/mapping/{sample}.log"
+            "logs/mapping/{sample}.log",
         shell:
-            "rm -rf temp_{wildcards.sample}/ && " # make sure temp dir is not present
+            "rm -rf temp_{wildcards.sample}/ && "
             "STAR --runThreadN {threads} "
             "--runMode alignReads "
             "--genomeDir {input.idx} "
@@ -108,44 +125,49 @@ if PAIRED_END:
             "--outTmpDir temp_{wildcards.sample}/ "
             "--outFileNamePrefix {params.prefix} "
             "{params.extra} "
-            "> {log} 2>&1"
+            "> {log} 2>&1"  # make sure temp dir is not present
+
 else:
-    rule mapping: 
+
+    rule mapping:
         input:
             fastq="results/trimmed/{sample}.fq.gz",
             idx=f"resources/{resources.genome}_{resources.build}_index_star/",
-            idxfiles=multiext(f"resources/{resources.genome}_{resources.build}_index_star/", "chrLength.txt", 
-            "chrNameLength.txt", 
-            "chrName.txt", 
-            "chrStart.txt", 
-            "exonGeTrInfo.tab", 
-            "exonInfo.tab",
-            "geneInfo.tab",
-            "Genome",
-            "genomeParameters.txt",
-            "Log.out",
-            "SA",
-            "SAindex",
-            "sjdbInfo.txt",
-            "sjdbList.fromGTF.out.tab",
-            "sjdbList.out.tab",
-            "transcriptInfo.tab"),
+            idxfiles=multiext(
+                f"resources/{resources.genome}_{resources.build}_index_star/",
+                "chrLength.txt",
+                "chrNameLength.txt",
+                "chrName.txt",
+                "chrStart.txt",
+                "exonGeTrInfo.tab",
+                "exonInfo.tab",
+                "geneInfo.tab",
+                "Genome",
+                "genomeParameters.txt",
+                "Log.out",
+                "SA",
+                "SAindex",
+                "sjdbInfo.txt",
+                "sjdbList.fromGTF.out.tab",
+                "sjdbList.out.tab",
+                "transcriptInfo.tab",
+            ),
         output:
             "results/mapped/{sample}/{sample}Log.final.out",
             "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
             "results/mapped/{sample}/{sample}ReadsPerGene.out.tab",
         params:
             prefix=lambda wc, output: output[0].replace("Log.final.out", ""),
-            extra=star_arguments(config)
+            extra=star_arguments(config),
         threads: 12
         resources:
-            runtime=90
+            runtime=90,
         conda:
             "../envs/mapping.yml"
         log:
-            "logs/mapping/{sample}.log"
+            "logs/mapping/{sample}.log",
         shell:
-            "rm -rf temp_{wildcards.sample}/ && " # make sure temp dir is not present
+            "rm -rf temp_{wildcards.sample}/ && "
             "STAR --runThreadN {threads} "
             "--runMode alignReads "
             "--genomeDir {input.idx} "
@@ -158,8 +180,7 @@ else:
             "--outTmpDir temp_{wildcards.sample}/ "
             "--outFileNamePrefix {params.prefix} "
             "{params.extra} "
-            "> {log} 2>&1"
-        
+            "> {log} 2>&1"  # make sure temp dir is not present
 
 
 rule index_bam:
@@ -169,9 +190,8 @@ rule index_bam:
         "results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
     threads: 4
     resources:
-        runtime=10
+        runtime=10,
     log:
-        "logs/samtools/index_{sample}.log"
+        "logs/samtools/index_{sample}.log",
     wrapper:
         "v5.5.1/bio/samtools/index"
-
