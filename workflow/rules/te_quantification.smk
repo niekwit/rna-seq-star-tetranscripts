@@ -96,3 +96,35 @@ else:
             "grep -v 'gene/TE' | "
             "sort | "
             "sed '1i gene/TE\tcount' > {output} 2> {log}"
+
+
+if config["telocal"]["apply"]:
+
+    rule TElocal_count:
+        input:
+            bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
+            bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
+            gtf=resources.gtf,
+            te_index=telocal_index(),
+        params:
+            strand=config["strand"],
+            extra=config["telocal"]["extra_params"],
+        output:
+            "results/telocal_count/{sample}.cntTable",
+        threads: 3
+        resources:
+            runtime=180,
+        conda:
+            "../envs/te.yml"
+        log:
+            "logs/telocal_count/{sample}.log",
+        shell:
+            # TElocal has no --outdir option, so the output directory is baked into --project
+            "TElocal --BAM {input.bam} "
+            "--GTF {input.gtf} "
+            "--TE {input.te_index} "
+            "--stranded {params.strand} "
+            "--sortByPos "
+            "--project results/telocal_count/{wildcards.sample} "
+            "{params.extra} "
+            "> {log} 2>&1"

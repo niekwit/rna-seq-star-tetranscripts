@@ -58,6 +58,23 @@ properties:
         type: string
         description: "Additional arguments to pass to STAR"
         default: ""
+
+  telocal:
+    type: object
+    description: "TElocal locus-level TE quantification parameters"
+    properties:
+      apply:
+        type: boolean
+        description: "Whether to also run TElocal for locus-level TE quantification"
+        default: false
+      index_url:
+        type: string
+        description: "URL to a prebuilt TElocal locus index (.locInd, gzipped), matched to the `genome` build"
+        default: ""
+      extra_params:
+        type: string
+        description: "Additional arguments to pass to TElocal"
+        default: ""
   
   deeptools:
     type: object

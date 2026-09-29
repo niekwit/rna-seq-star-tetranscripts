@@ -20,6 +20,11 @@ mapping: # STAR mapping parameters
 # This is recommended for running large datasets on a cluster
 split_bam: False
 
+telocal:
+  apply: False # also run TElocal for locus-level TE quantification (in addition to TEtranscripts)
+  index_url: ""
+  extra_params: ""
+
 deeptools:
   normalisation: RPKM
   binsize: 1000

@@ -144,6 +144,18 @@ def check_spike_in_resources():
         raise ValueError(f"Spike-in gtf file {config['spike_in']['gtf']} not found")
 
 
+def telocal_index():
+    """
+    Return the local path for the downloaded TElocal locus index,
+    derived from config["telocal"]["index_url"] (mirrors Resources._file_from_url).
+    """
+    url = config["telocal"]["index_url"]
+    name = os.path.basename(url).split("?")[0]
+    if name.endswith(".gz"):
+        name = name[: -len(".gz")]
+    return f"resources/{name}"
+
+
 def index_resource(format):
     """
     Return fasta/gtf file for indexing:

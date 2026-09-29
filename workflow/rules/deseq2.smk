@@ -31,6 +31,7 @@ rule deseq2:
         genome=resources.genome,
         spikein=config["spike_in"]["apply"],
         spikein_name=config["spike_in"]["name"],
+        write_genes=True,
     threads: 4
     resources:
         runtime=90,
@@ -40,3 +41,31 @@ rule deseq2:
         "logs/deseq2/deseq2.log",
     script:
         "../scripts/deseq2.R"
+
+
+if config["telocal"]["apply"]:
+
+    rule deseq2_telocal:
+        input:
+            counts=expand("results/telocal_count/{sample}.cntTable", sample=SAMPLES),
+            edb="resources/edb.RData",
+        output:
+            rdata="results/telocal_deseq2/dds.RData",
+            te_csv=expand(
+                "results/telocal_deseq2/{comparison}_te.csv", comparison=COMPARISONS
+            ),
+        params:
+            strand=config["strand"],
+            genome=resources.genome,
+            spikein=config["spike_in"]["apply"],
+            spikein_name=config["spike_in"]["name"],
+            write_genes=False,
+        threads: 4
+        resources:
+            runtime=90,
+        conda:
+            "../envs/deseq2.yml"
+        log:
+            "logs/deseq2/deseq2_telocal.log",
+        script:
+            "../scripts/deseq2.R"

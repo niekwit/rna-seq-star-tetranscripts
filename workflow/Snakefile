@@ -46,19 +46,32 @@ include: "rules/bigwig.smk"
 
 
 # Target rule
+rule_all_input = [
+    "results/plots/mapping_rates.pdf",
+    "results/plots/mapping_rates.csv",
+    "results/plots/sample_distance.pdf",
+    "results/plots/pca.pdf",
+    *expand("results/bigwig/{sample}.bw", sample=SAMPLES),
+    *expand(
+        "results/plots/volcano/{comparison}_{type}.pdf",
+        comparison=COMPARISONS,
+        type=["genes", "te"],
+    ),
+    *expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS),
+]
+
+if config["telocal"]["apply"]:
+    rule_all_input += expand(
+        "results/telocal_deseq2/{comparison}_te.csv", comparison=COMPARISONS
+    )
+    rule_all_input += expand(
+        "results/telocal_plots/volcano/{comparison}_te.pdf", comparison=COMPARISONS
+    )
+
+
 rule all:
     input:
-        "results/plots/mapping_rates.pdf",
-        "results/plots/mapping_rates.csv",
-        "results/plots/sample_distance.pdf",
-        "results/plots/pca.pdf",
-        expand("results/bigwig/{sample}.bw", sample=SAMPLES),
-        expand(
-            "results/plots/volcano/{comparison}_{type}.pdf",
-            comparison=COMPARISONS,
-            type=["genes", "te"],
-        ),
-        expand("results/plots/te_classes/{comparison}.pdf", comparison=COMPARISONS),
+        rule_all_input,
 
 
 # Save snakemake terminal output to log file

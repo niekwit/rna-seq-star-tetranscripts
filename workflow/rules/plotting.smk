@@ -80,6 +80,31 @@ rule plot_volcano:
         "../scripts/volcano.R"
 
 
+if config["telocal"]["apply"]:
+
+    rule plot_volcano_telocal:
+        input:
+            csv="results/telocal_deseq2/{comparison}_{type}.csv",
+        output:
+            pdf=report(
+                "results/telocal_plots/volcano/{comparison}_{type}.pdf",
+                caption="report/volcano.rst",
+                category="Volcano plots (TElocal)",
+            ),
+        params:
+            fdr=config["fdr_cutoff"],
+            fc=config["fc_cutoff"],
+        conda:
+            "../envs/deseq2.yml"
+        threads: 1
+        resources:
+            runtime=10,
+        log:
+            "logs/plots/volcano_telocal_{comparison}_{type}.log",
+        script:
+            "../scripts/volcano.R"
+
+
 rule plot_te_classes:
     input:
         te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS),

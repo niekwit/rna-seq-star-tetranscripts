@@ -271,18 +271,25 @@ names(df.list.genes) <- names.genes
 names.te <- lapply(df.list.te, function(x) unique(x$contrast_name))
 names(df.list.te) <- names.te
 
-# Write each df to separate csv file
+# Write each df to separate csv file (into the same directory as the dds.RData output)
+outdir <- dirname(snakemake@output[["rdata"]])
+write_genes <- snakemake@params[["write_genes"]]
+
 save2csv <- function(df.list, type){
   for (i in seq(df.list)) {
     # Check if df is empty
     stopifnot(nrow(df.list[[i]]) > 0)
     # Write to file
-    write.csv(df.list[[i]], 
-              paste0("results/deseq2/", names(df.list)[i], type, ".csv"), 
+    write.csv(df.list[[i]],
+              file.path(outdir, paste0(names(df.list)[i], type, ".csv")),
               row.names = FALSE)
   }
 }
-save2csv(df.list.genes, "_genes")
+# Gene-level results are skipped when reusing this script for TElocal's locus-level
+# counts, since gene-level results already exist from the TEtranscripts run
+if (write_genes == "True") {
+  save2csv(df.list.genes, "_genes")
+}
 save2csv(df.list.te, "_te")
 
 sink(log, type = "output")

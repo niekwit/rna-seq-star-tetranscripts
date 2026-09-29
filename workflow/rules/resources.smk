@@ -33,6 +33,17 @@ use rule get_fasta as get_te_gtf with:
         "logs/resources/get_te_gtf.log",
 
 
+if config["telocal"]["apply"]:
+
+    use rule get_fasta as get_telocal_index with:
+        output:
+            telocal_index(),
+        params:
+            url=config["telocal"]["index_url"],
+        log:
+            "logs/resources/get_telocal_index.log",
+
+
 if config["spike_in"]["apply"]:
     logger.info("Spike-in applied")
     check_spike_in_resources()

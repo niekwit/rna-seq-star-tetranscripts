@@ -20,6 +20,13 @@ mapping: # STAR mapping parameters
 # This is recommended for running large datasets on a cluster
 split_bam: False
 
+telocal:
+  apply: False # also run TElocal for locus-level TE quantification (in addition to TEtranscripts)
+  # URL to a prebuilt TElocal locus index (a gzipped .locInd file), matched to `genome` above
+  # get download instructions/links from https://www.mghlab.org/software/telocal
+  index_url: ""
+  extra_params: "" # additional arguments to pass to TElocal (e.g. "--mode uniq")
+
 deeptools:
   binsize: 50
   normalisation: RPKM
