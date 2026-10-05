@@ -105,6 +105,28 @@ if config["telocal"]["apply"]:
             "../scripts/volcano.R"
 
 
+if config["telocal"]["apply"]:
+
+    rule telocal_up_bed:
+        input:
+            csv="results/telocal_deseq2/{comparison}_te.csv",
+            locations=telocal_locations(),
+        output:
+            bed="results/telocal_bed/{comparison}_up.bed",
+        params:
+            fdr=config["fdr_cutoff"],
+            fc=config["fc_cutoff"],
+        conda:
+            "../envs/deseq2.yml"
+        threads: 1
+        resources:
+            runtime=10,
+        log:
+            "logs/plots/telocal_up_bed_{comparison}.log",
+        script:
+            "../scripts/telocal_up_bed.R"
+
+
 rule plot_te_classes:
     input:
         te_csv=expand("results/deseq2/{comparison}_te.csv", comparison=COMPARISONS),

@@ -55,6 +55,14 @@ if config["telocal"]["apply"]:
             'curl -fL "$src" -o {output}.gz && pigz -df {output}.gz; '
             "fi > {log} 2>&1"
 
+    use rule get_telocal_index as get_telocal_locations with:
+        output:
+            telocal_locations(),
+        params:
+            source=config["telocal"]["locations_url"],
+        log:
+            "logs/resources/get_telocal_locations.log",
+
 
 if config["spike_in"]["apply"]:
     logger.info("Spike-in applied")

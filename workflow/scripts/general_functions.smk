@@ -160,6 +160,18 @@ def telocal_index():
     return f"resources/{name}"
 
 
+def telocal_locations():
+    """
+    Return the local path for the downloaded TElocal locations file,
+    derived from config["telocal"]["locations_url"] (same scheme as telocal_index).
+    """
+    url = config["telocal"]["locations_url"]
+    name = os.path.basename(url).split("?")[0]
+    if name.endswith(".gz"):
+        name = name[: -len(".gz")]
+    return f"resources/{name}"
+
+
 def index_resource(format):
     """
     Return fasta/gtf file for indexing:

@@ -25,6 +25,8 @@ telocal:
   # URL or local path to a prebuilt TElocal locus index (gzipped .locInd file), matched to `genome` above
   # get download instructions/links from https://www.mghlab.org/software/telocal
   index_url: ""
+  # URL or local path to the matching locus locations file (<index>.locations.gz), used for BED output
+  locations_url: ""
   extra_params: "" # additional arguments to pass to TElocal (e.g. "--mode uniq")
 
 deeptools:

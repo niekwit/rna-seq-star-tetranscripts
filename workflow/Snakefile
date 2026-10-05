@@ -5,7 +5,7 @@ include: "scripts/general_functions.smk"
 min_version("8.25.5")
 
 # Workflow version
-VERSION = "v0.6.0"
+VERSION = "v0.7.0"
 
 
 # Load config file
@@ -66,6 +66,9 @@ if config["telocal"]["apply"]:
     )
     rule_all_input += expand(
         "results/telocal_plots/volcano/{comparison}_te.pdf", comparison=COMPARISONS
+    )
+    rule_all_input += expand(
+        "results/telocal_bed/{comparison}_up.bed", comparison=COMPARISONS
     )
 
 

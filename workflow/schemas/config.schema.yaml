@@ -71,6 +71,10 @@ properties:
         type: string
         description: "URL to a prebuilt TElocal locus index (.locInd, gzipped), matched to the `genome` build"
         default: ""
+      locations_url:
+        type: string
+        description: "URL or local path to the TElocal locus locations file (.locations.gz) matching the index"
+        default: ""
       extra_params:
         type: string
         description: "Additional arguments to pass to TElocal"
