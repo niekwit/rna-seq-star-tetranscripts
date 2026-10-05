@@ -19,11 +19,9 @@ rule star_index:
         gtf=index_resource("gtf"),
         rl="results/qc/readlength.txt",
     output:
-        directory=directory(
-            f"resources/{resources.genome}_{resources.build}_index_star/"
-        ),
+        directory=directory(star_index_dir()),
         files=multiext(
-            f"resources/{resources.genome}_{resources.build}_index_star/",
+            star_index_dir(),
             "chrLength.txt",
             "chrNameLength.txt",
             "chrName.txt",
@@ -77,9 +75,9 @@ if PAIRED_END:
         input:
             val1="results/trimmed/{sample}_val_1.fq.gz",
             val2="results/trimmed/{sample}_val_2.fq.gz",
-            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+            idx=star_index_dir(),
             idxfiles=multiext(
-                f"resources/{resources.genome}_{resources.build}_index_star/",
+                star_index_dir(),
                 "chrLength.txt",
                 "chrNameLength.txt",
                 "chrName.txt",
@@ -133,9 +131,9 @@ else:
     rule mapping:
         input:
             fastq="results/trimmed/{sample}.fq.gz",
-            idx=f"resources/{resources.genome}_{resources.build}_index_star/",
+            idx=star_index_dir(),
             idxfiles=multiext(
-                f"resources/{resources.genome}_{resources.build}_index_star/",
+                star_index_dir(),
                 "chrLength.txt",
                 "chrNameLength.txt",
                 "chrName.txt",

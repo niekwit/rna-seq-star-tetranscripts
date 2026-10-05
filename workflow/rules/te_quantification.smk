@@ -4,7 +4,7 @@ if not config["split_bam"]:
         input:
             bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
             bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
-            gtf=resources.gtf,
+            gtf=index_resource("gtf"),
             te_gtf=resources.tegtf,
         params:
             strand=config["strand"],
@@ -104,7 +104,7 @@ if config["telocal"]["apply"]:
         input:
             bam="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam",
             bai="results/mapped/{sample}/{sample}Aligned.sortedByCoord.out.bam.bai",
-            gtf=resources.gtf,
+            gtf=index_resource("gtf"),
             te_index=telocal_index(),
         params:
             strand=config["strand"],

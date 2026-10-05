@@ -9,7 +9,7 @@ library(DESeq2)
 # Load Snakemake variables
 count.files <- snakemake@input[["counts"]]
 genome <- snakemake@params[["genome"]]
-spikein <- snakemake@params[["spikein"]]
+spikein <- isTRUE(snakemake@params[["spikein"]])
 spikein_name <- snakemake@params[["spikein_name"]]
 
 # Get gene annotation
@@ -36,9 +36,9 @@ rownames(countMatrix) <- countMatrix$index
 countMatrix$index <- NULL
 
 ### Check if spike-in needs to be applied to generate custom size factors
-if (spikein == "True") {
+if (spikein) {
   print("Calculating size factors using spike-in counts...")
-  is_spikein <- grepl(spikein_name, rownames(counts_matrix))
+  is_spikein <- grepl(spikein_name, rownames(countMatrix))
 
   # Check if any spike-ins were found
   if (length(is_spikein) == 0) {
@@ -50,7 +50,7 @@ if (spikein == "True") {
   }
 
   # Subset the matrix to get only spike-in counts
-  spikein_counts_matrix <- counts_matrix[is_spikein, ]
+  spikein_counts_matrix <- countMatrix[is_spikein, ]
 
   # Check for samples with zero total spike-in counts, which might cause issues
   # print these samples
@@ -64,10 +64,17 @@ if (spikein == "True") {
     }
   }
 
-  # Remove rows with zero counts for all samples
+  # estimateSizeFactorsForMatrix needs spike-ins with non-zero counts in every sample
   spikein_counts_matrix <- spikein_counts_matrix[
-    rowSums(spikein_counts_matrix) > 0,
+    rowSums(spikein_counts_matrix == 0) == 0,
+    ,
+    drop = FALSE
   ]
+  if (nrow(spikein_counts_matrix) == 0) {
+    stop(
+      "ERROR: No spike-ins with non-zero counts in every sample; cannot compute spike-in size factors."
+    )
+  }
 
   # Calculate size factors using ONLY the spike-in counts matrix
   spikein_size_factors <- estimateSizeFactorsForMatrix(spikein_counts_matrix)
@@ -135,7 +142,7 @@ if (length(batches) == 1) {
 }
 
 # Apply spike-in size factors if specified
-if (spikein == "True") {
+if (spikein) {
   print("Applying custom size factors to DESeq2 object...")
 
   # Check if sample order of spikein_size_factors matches the order of samples in dds
@@ -220,7 +227,7 @@ for (r in seq(references)) {
       mutate(ensembl_gene_id = res@rownames, .before = 1)
 
     # Remove spike-in genes (if any)
-    if (spikein == "True") {
+    if (spikein) {
       df <- df[!grepl(spikein_name, df$ensembl_gene_id), ]
     }
 

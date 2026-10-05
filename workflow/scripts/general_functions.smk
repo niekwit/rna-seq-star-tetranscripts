@@ -93,12 +93,20 @@ def get_chromosomes(genome):
         raise ValueError(f"Genome {genome} not found")
 
 
+def star_index_dir():
+    """
+    Return the STAR index directory; spike-in genomes get their own index
+    so the two cannot be mixed up.
+    """
+    suffix = "_spikein" if config["spike_in"]["apply"] else ""
+    return f"resources/{genome}_{resources.build}_index_star{suffix}/"
+
+
 def mapping_input(wildcards):
     """
-    Return the input files for mapping based on whether
-    spike-in should be applied or not.
+    Return the input files for mapping.
     """
-    base_idx = f"resources/{genome}_{resources.build}_index_star/"
+    base_idx = star_index_dir()
 
     input_dict = {}
     input_dict["idx"] = base_idx
@@ -124,12 +132,8 @@ def mapping_input(wildcards):
     idx_files = [f"{base_idx}{i}" for i in idx_files]
     input_dict["idx_files"] = idx_files
 
-    if config["spike_in"]["apply"]:
-        val1 = "results/spike_in/{sample}_1.fq.gz"
-        val2 = "results/spike_in/{sample}_2.fq.gz"
-    else:
-        val1 = ("results/trimmed/{sample}_val_1.fq.gz",)
-        val2 = ("results/trimmed/{sample}_val_2.fq.gz",)
+    val1 = ("results/trimmed/{sample}_val_1.fq.gz",)
+    val2 = ("results/trimmed/{sample}_val_2.fq.gz",)
 
     input_dict["val1"] = val1
     input_dict["val2"] = val2
