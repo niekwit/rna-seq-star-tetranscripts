@@ -1,5 +1,5 @@
 # Redirect R output to log
-log <- file(snakemake@log[[1]], open="wt")
+log <- file(snakemake@log[[1]], open = "wt")
 sink(log, type = "output")
 sink(log, type = "message")
 
@@ -16,22 +16,20 @@ spikein_name <- snakemake@params[["spikein_name"]]
 load(snakemake@input[["edb"]])
 
 # Use first count file as template for count matrix
-countMatrix <- read.delim(count.files[1]) 
+countMatrix <- read.delim(count.files[1])
 names(countMatrix) <- c("index", sub(".cntTable", "", basename(count.files[1])))
 
 # Add all count data to countMatrix
 for (i in seq(from = 2, to = length(count.files))) {
-    sample <- sub(".cntTable", "", basename(count.files[i]))
-    df <- read.delim(count.files[i])
-    colnames(df) <- c("index", sample)
-    
-    countMatrix <- full_join(countMatrix,
-                             df,
-                             by = "index")
-  }
+  sample <- sub(".cntTable", "", basename(count.files[i]))
+  df <- read.delim(count.files[i])
+  colnames(df) <- c("index", sample)
+
+  countMatrix <- full_join(countMatrix, df, by = "index")
+}
 
 # Remove lines with all 0s
-countMatrix <- countMatrix[rowSums(countMatrix[,2:ncol(countMatrix)]) > 0,]
+countMatrix <- countMatrix[rowSums(countMatrix[, 2:ncol(countMatrix)]) > 0, ]
 
 # Create named index
 rownames(countMatrix) <- countMatrix$index
@@ -43,8 +41,12 @@ if (spikein == "True") {
   is_spikein <- grepl(spikein_name, rownames(counts_matrix))
 
   # Check if any spike-ins were found
-  if(length(is_spikein) == 0) {
-    stop(paste0("No spike-in identifiers found in rownames. Check your pattern(", spikein_name, ")"))
+  if (length(is_spikein) == 0) {
+    stop(paste0(
+      "No spike-in identifiers found in rownames. Check your pattern(",
+      spikein_name,
+      ")"
+    ))
   }
 
   # Subset the matrix to get only spike-in counts
@@ -52,7 +54,9 @@ if (spikein == "True") {
 
   # Check for samples with zero total spike-in counts, which might cause issues
   # print these samples
-  zero_spikein_samples <- colnames(spikein_counts_matrix)[colSums(spikein_counts_matrix) == 0]
+  zero_spikein_samples <- colnames(spikein_counts_matrix)[
+    colSums(spikein_counts_matrix) == 0
+  ]
   if (length(zero_spikein_samples) > 0) {
     print("WARNING: The following samples have zero total spike-in counts:")
     for (i in seq(zero_spikein_samples)) {
@@ -61,7 +65,9 @@ if (spikein == "True") {
   }
 
   # Remove rows with zero counts for all samples
-  spikein_counts_matrix <- spikein_counts_matrix[rowSums(spikein_counts_matrix) > 0, ]
+  spikein_counts_matrix <- spikein_counts_matrix[
+    rowSums(spikein_counts_matrix) > 0,
+  ]
 
   # Calculate size factors using ONLY the spike-in counts matrix
   spikein_size_factors <- estimateSizeFactorsForMatrix(spikein_counts_matrix)
@@ -94,12 +100,16 @@ if ("batch" %in% colnames(samples)) {
 # This allows for a re-run of DESeq2 without having to re-run the entire pipeline
 all_samples <- samples$sample
 
-if (length((all_samples)) != length(count.files)){
-  omitted <- count.files[!(basename(gsub(pattern = "\\.cntTable", "", count.files)) %in% all_samples)]
-  print("WARNING: Some samples have been omitted from samples.csv. Resuming without these samples:")
-  for (i in seq(omitted)){
+if (length((all_samples)) != length(count.files)) {
+  omitted <- count.files[
+    !(basename(gsub(pattern = "\\.cntTable", "", count.files)) %in% all_samples)
+  ]
+  print(
+    "WARNING: Some samples have been omitted from samples.csv. Resuming without these samples:"
+  )
+  for (i in seq(omitted)) {
     print(basename(gsub(pattern = "\\.cntTable", "", omitted[i])))
-   }
+  }
   # Remove omitted samples from countMatrix
   countMatrix <- countMatrix[, colnames(countMatrix) %in% all_samples]
 
@@ -108,25 +118,31 @@ if (length((all_samples)) != length(count.files)){
 }
 
 # Create DESeq2 object
-if (length(batches) == 1){
+if (length(batches) == 1) {
   print("Not including batch factor in DESeq2 design...")
-  dds <- DESeqDataSetFromMatrix(countData = countMatrix,
-                              colData = samples,
-                              design = ~comb)
+  dds <- DESeqDataSetFromMatrix(
+    countData = countMatrix,
+    colData = samples,
+    design = ~comb
+  )
 } else {
   print("Including batch factor in DESeq2 design...")
-  dds <- DESeqDataSetFromMatrix(countData = countMatrix,
-                              colData = samples,
-                              design = ~batch + comb)
+  dds <- DESeqDataSetFromMatrix(
+    countData = countMatrix,
+    colData = samples,
+    design = ~ batch + comb
+  )
 }
 
 # Apply spike-in size factors if specified
 if (spikein == "True") {
   print("Applying custom size factors to DESeq2 object...")
-  
+
   # Check if sample order of spikein_size_factors matches the order of samples in dds
   if (!all(colnames(spikein_counts_matrix) == colnames(dds))) {
-    stop("ERROR: Sample order of spikein_size_factors does not match the order of samples in dds.")
+    stop(
+      "ERROR: Sample order of spikein_size_factors does not match the order of samples in dds."
+    )
   }
   print("Size factors before spike-in correction:")
   print(sizeFactors(dds))
@@ -140,29 +156,33 @@ if (spikein == "True") {
 save(dds, file = snakemake@output[["rdata"]])
 
 # Load reference samples
-references <- unique(samples[samples$reference == "yes" , ]$comb)
+references <- unique(samples[samples$reference == "yes", ]$comb)
 if (length(references) == 0) {
   stop("ERROR: No reference samples found. Please check your samples.csv file.")
 }
 
 # Create nested lists to store all pairwise comparisons (top level:references, lower level: samples without reference)
-df.list.genes <- vector(mode="list", length = length(references))
+df.list.genes <- vector(mode = "list", length = length(references))
 for (i in seq_along(references)) {
-  df.list.genes[[i]] <- vector(mode = "list",
-                               length = (length(unique(samples$comb)) - 1 ))
+  df.list.genes[[i]] <- vector(
+    mode = "list",
+    length = (length(unique(samples$comb)) - 1)
+  )
 }
 
 df.list.te <- vector(mode = "list", length = length(references))
 for (i in seq_along(references)) {
-  df.list.te[[i]] <- vector(mode = "list",
-                            length = (length(unique(samples$comb)) - 1 ))
+  df.list.te[[i]] <- vector(
+    mode = "list",
+    length = (length(unique(samples$comb)) - 1)
+  )
 }
 
 # Get gene IDs
 genes <- row.names(countMatrix)
 if (grepl("hg", genome, fixed = TRUE)) {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
-} else if (grepl("mm", genome, fixed=TRUE)) {
+} else if (grepl("mm", genome, fixed = TRUE)) {
   genes <- genes[grepl("ENSMUSG[0-9]{11}+", genes, perl = TRUE)]
 } else if (genome == "test") {
   genes <- genes[grepl("ENSG[0-9]{11}+", genes, perl = TRUE)]
@@ -192,7 +212,7 @@ for (r in seq(references)) {
   for (c in seq(comparisons)) {
     # Get name of comparison
     comparison <- comparisons[[c]]
-    comparison <- str_replace(comparison, "comb_", "") 
+    comparison <- str_replace(comparison, "comb_", "")
 
     res <- results(dds_relevel, name = comparisons[[c]])
 
@@ -205,34 +225,40 @@ for (r in seq(references)) {
     }
 
     # Get non-TE genes
-    if (grepl("hg",genome) ==TRUE) {
-      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
-    } else if (grepl("mm",genome) == TRUE){
-      df.genes <- df[grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
+    if (grepl("hg", genome) == TRUE) {
+      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE), ]
+    } else if (grepl("mm", genome) == TRUE) {
+      df.genes <- df[
+        grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),
+      ]
     } else if (genome == "test") {
-      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),]
+      df.genes <- df[grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE), ]
     }
 
     # Get TE genes
-    if (grepl("hg",genome) == TRUE) {
-      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
-    } else if (grepl("mm",genome) == TRUE){
-      df.te <- df[!grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
+    if (grepl("hg", genome) == TRUE) {
+      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE), ]
+    } else if (grepl("mm", genome) == TRUE) {
+      df.te <- df[
+        !grepl("ENSMUSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),
+      ]
     } else if (genome == "test") {
-      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE),] 
+      df.te <- df[!grepl("ENSG[0-9]{11}+", df$ensembl_gene_id, perl = TRUE), ]
     }
 
     # Add gene annotation to df.genes
-    df.genes <- left_join(df.genes,gene.info, by = "ensembl_gene_id")
+    df.genes <- left_join(df.genes, gene.info, by = "ensembl_gene_id")
 
-    # Get normalised read counts for each sample  
+    # Get normalised read counts for each sample
     temp <- as.data.frame(counts(dds_relevel, normalized = TRUE))
     temp$ensembl_gene_id <- row.names(temp)
     temp$ensembl_gene_id <- gsub("\\.[0-9]*", "", temp$ensembl_gene_id) #tidy up gene IDs
-    names(temp)[1:length(dds_relevel@colData@listData$sample)] <- dds_relevel@colData@listData$sample
+    names(temp)[
+      1:length(dds_relevel@colData@listData$sample)
+    ] <- dds_relevel@colData@listData$sample
 
     # Add normalised read counts to df.genes
-    df.genes <- left_join(df.genes,temp, by = "ensembl_gene_id")
+    df.genes <- left_join(df.genes, temp, by = "ensembl_gene_id")
     df.genes <- df.genes %>%
       mutate(contrast_name = comparison, .before = 1)
 
@@ -240,7 +266,7 @@ for (r in seq(references)) {
     df.list.genes[[r]][[c]] <- df.genes
 
     # Add normalised read counts to df.te
-    df.te <- left_join(df.te,temp, by = "ensembl_gene_id")
+    df.te <- left_join(df.te, temp, by = "ensembl_gene_id")
     df.te <- df.te %>%
       mutate(contrast_name = comparison, .before = 1)
 
@@ -250,10 +276,10 @@ for (r in seq(references)) {
 }
 
 # Function to flatten nested lists (https://stackoverflow.com/questions/16300344/how-to-flatten-a-list-of-lists/41882883#41882883)
-flattenlist <- function(x) {  
+flattenlist <- function(x) {
   morelists <- sapply(x, function(xprime) class(xprime)[1] == "list")
   out <- c(x[!morelists], unlist(x[morelists], recursive = FALSE))
-  if(sum(morelists)) { 
+  if (sum(morelists)) {
     Recall(out)
   } else {
     return(out)
@@ -273,21 +299,23 @@ names(df.list.te) <- names.te
 
 # Write each df to separate csv file (into the same directory as the dds.RData output)
 outdir <- dirname(snakemake@output[["rdata"]])
-write_genes <- snakemake@params[["write_genes"]]
+write_genes <- isTRUE(snakemake@params[["write_genes"]])
 
-save2csv <- function(df.list, type){
+save2csv <- function(df.list, type) {
   for (i in seq(df.list)) {
     # Check if df is empty
     stopifnot(nrow(df.list[[i]]) > 0)
     # Write to file
-    write.csv(df.list[[i]],
-              file.path(outdir, paste0(names(df.list)[i], type, ".csv")),
-              row.names = FALSE)
+    write.csv(
+      df.list[[i]],
+      file.path(outdir, paste0(names(df.list)[i], type, ".csv")),
+      row.names = FALSE
+    )
   }
 }
 # Gene-level results are skipped when reusing this script for TElocal's locus-level
 # counts, since gene-level results already exist from the TEtranscripts run
-if (write_genes == "True") {
+if (write_genes) {
   save2csv(df.list.genes, "_genes")
 }
 save2csv(df.list.te, "_te")

@@ -35,13 +35,25 @@ use rule get_fasta as get_te_gtf with:
 
 if config["telocal"]["apply"]:
 
-    use rule get_fasta as get_telocal_index with:
+    rule get_telocal_index:
         output:
             telocal_index(),
         params:
-            url=config["telocal"]["index_url"],
+            source=config["telocal"]["index_url"],
         log:
             "logs/resources/get_telocal_index.log",
+        threads: 1
+        resources:
+            runtime=15,
+        conda:
+            "../envs/mapping.yml"
+        shell:
+            'src="{params.source}"; '
+            'if [ -f "$src" ]; then '
+            'case "$src" in *.gz) pigz -dc "$src" > {output} ;; *) cp "$src" {output} ;; esac; '
+            "else "
+            'curl -fL "$src" -o {output}.gz && pigz -df {output}.gz; '
+            "fi > {log} 2>&1"
 
 
 if config["spike_in"]["apply"]:
