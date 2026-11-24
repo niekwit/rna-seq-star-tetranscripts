@@ -1,0 +1,1 @@
+Number of differentially expressed transposable elements per TE class for each pairwise comparison of DESeq2 results (TEtranscripts counts), split into upregulated and downregulated elements using the configured FDR and log2 fold change cut-offs.
