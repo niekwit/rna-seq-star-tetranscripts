@@ -33,7 +33,10 @@ for (i in seq_along(files)) {
   # read in data
   print(paste0("Loading data from ", files[[i]],"..."))
   data <- read.csv(files[[i]])
-  
+
+  # Extract comparison name from file name (needed before any early exit below)
+  sample <- str_replace(basename(files[[i]]), "_te.csv", "")
+
   # DESeq2 data might be empty?
   if (nrow(data) == 0) {
     print(paste0("No differential TEs found for ", sample, "..."))
@@ -41,8 +44,6 @@ for (i in seq_along(files)) {
     next
   }
 
-  # Extract comparison name from file name
-  sample <- str_replace(basename(files[[i]]), "_te.csv", "")
   print("Annotating data...")
   
   # Annotate data with TE class
@@ -80,14 +81,9 @@ for (i in seq_along(files)) {
     summarise(Downregulated = n()) %>%
     mutate(sample = sample)
 
-  # Merge data and replace NA with zero
-  if (nrow(df.up) != 0 & nrow(df.down) != 0 | nrow(df.up) != 0 & nrow(df.down) == 0 ) {
-    df <- left_join(df.up, df.down, by = join_by(class, sample))
-  } else if (nrow(df.up) == 0 & nrow(df.down) != 0) {
-    df <- left_join(df.down, df.up, by = join_by(class, sample))
-  } else if (nrow(df.up) == 0 & nrow(df.down) == 0) {
-    next
-  }
+  # Merge data and replace NA with zero; a full join keeps classes that are
+  # only up- or only downregulated (at least one side is non-empty here)
+  df <- full_join(df.up, df.down, by = join_by(class, sample))
 
   df <- df %>% 
     replace(is.na(.), 0) %>%

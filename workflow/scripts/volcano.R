@@ -32,8 +32,7 @@ df <- df %>%
   mutate(colour = case_when(
     log2FoldChange > lfc & log.padj > fdr ~ "red",
     log2FoldChange < -lfc & log.padj > fdr ~ "navy",
-    log2FoldChange < lfc & log.padj < fdr ~ "grey40",
-    log2FoldChange > -lfc & log.padj < fdr ~ "grey40",
+    TRUE ~ "grey40" # everything not passing both cut-offs, including values on a cut-off
   )) 
 
 # select top 8 down and up regulated for labels
