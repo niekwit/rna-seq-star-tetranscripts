@@ -1,6 +1,6 @@
 FROM condaforge/miniforge3:latest
 LABEL io.github.snakemake.containerized="true"
-LABEL io.github.snakemake.conda_env_hash="91e504833d2de0c974e2c0da0162b5b4ce1feab9c1b64749a908274b35ec972c"
+LABEL io.github.snakemake.conda_env_hash="eec9a7e4c902615234ac4211170118d7904952ac18be0d9496754a4ec7b37f87"
 
 # Step 2: Retrieve conda environments
 
@@ -28,18 +28,6 @@ ADD https://github.com/snakemake/snakemake-wrappers/raw/v5.5.1/bio/fastqc/enviro
 #     - samtools =1.21
 RUN mkdir -p /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b
 ADD https://github.com/snakemake/snakemake-wrappers/raw/v5.5.1/bio/samtools/index/environment.yaml /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b/environment.yaml
-
-# Conda environment:
-#   source: https://github.com/snakemake/snakemake-wrappers/raw/v5.5.1/bio/trim_galore/pe/environment.yaml
-#   prefix: /conda-envs/975a4a78cc02737b050b54b2645b9ecc
-#   channels:
-#     - conda-forge
-#     - bioconda
-#     - nodefaults
-#   dependencies:
-#     - trim-galore =0.6.10
-RUN mkdir -p /conda-envs/975a4a78cc02737b050b54b2645b9ecc
-ADD https://github.com/snakemake/snakemake-wrappers/raw/v5.5.1/bio/trim_galore/pe/environment.yaml /conda-envs/975a4a78cc02737b050b54b2645b9ecc/environment.yaml
 
 # Conda environment:
 #   source: workflow/envs/deeptools.yml
@@ -126,14 +114,30 @@ COPY workflow/envs/rtracklayer.yml /conda-envs/ad2411a11f8886f06eaf5ae0af7a2582/
 RUN mkdir -p /conda-envs/c4b565a9ee40a6be82be171208e594cd
 COPY workflow/envs/te.yml /conda-envs/c4b565a9ee40a6be82be171208e594cd/environment.yaml
 
+# Conda environment:
+#   source: workflow/envs/trim_galore.yml
+#   prefix: /conda-envs/f25143b31d35300a2e0f8a6febf76392
+#   name: trim_galore
+#   channels:
+#     - conda-forge
+#     - bioconda
+#     - defaults
+#   dependencies:
+#     # Pinned to this exact build: build h9ee0642_0 was linked against a newer
+#     # glibc than older hosts (e.g. Ubuntu 20.04, glibc 2.31) provide, causing
+#     # `GLIBC_2.32/2.33/2.34 not found` errors. hf1b6044_1 fixes this (glibc <=2.16).
+#     - trim-galore=2.2.0=hf1b6044_1
+RUN mkdir -p /conda-envs/f25143b31d35300a2e0f8a6febf76392
+COPY workflow/envs/trim_galore.yml /conda-envs/f25143b31d35300a2e0f8a6febf76392/environment.yaml
+
 # Step 3: Generate conda environments
 
 RUN conda env create --prefix /conda-envs/24b8923f8e4abe077ffe95b01bfc1652 --file /conda-envs/24b8923f8e4abe077ffe95b01bfc1652/environment.yaml && \
     conda env create --prefix /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b --file /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b/environment.yaml && \
-    conda env create --prefix /conda-envs/975a4a78cc02737b050b54b2645b9ecc --file /conda-envs/975a4a78cc02737b050b54b2645b9ecc/environment.yaml && \
     conda env create --prefix /conda-envs/cb3f51030520fe1abe74523b3e058594 --file /conda-envs/cb3f51030520fe1abe74523b3e058594/environment.yaml && \
     conda env create --prefix /conda-envs/d5cd58d499e48dfcf2ddba99fbbc70ed --file /conda-envs/d5cd58d499e48dfcf2ddba99fbbc70ed/environment.yaml && \
     conda env create --prefix /conda-envs/8bda2bb25358eea446fa54587cd1f747 --file /conda-envs/8bda2bb25358eea446fa54587cd1f747/environment.yaml && \
     conda env create --prefix /conda-envs/ad2411a11f8886f06eaf5ae0af7a2582 --file /conda-envs/ad2411a11f8886f06eaf5ae0af7a2582/environment.yaml && \
     conda env create --prefix /conda-envs/c4b565a9ee40a6be82be171208e594cd --file /conda-envs/c4b565a9ee40a6be82be171208e594cd/environment.yaml && \
+    conda env create --prefix /conda-envs/f25143b31d35300a2e0f8a6febf76392 --file /conda-envs/f25143b31d35300a2e0f8a6febf76392/environment.yaml && \
     conda clean --all -y
