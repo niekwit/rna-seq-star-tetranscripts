@@ -13,8 +13,10 @@ if PAIRED_END:
             runtime=30,
         log:
             "logs/trim_galore/{sample}.log",
+        conda:
+            "../envs/trim_galore.yml"
         wrapper:
-            "v5.5.1/bio/trim_galore/pe"
+            "v9.9.0/bio/trim_galore/pe"
 
 else:
 
@@ -29,5 +31,7 @@ else:
             runtime=30,
         log:
             "logs/trim_galore/{sample}.log",
+        conda:
+            "../envs/trim_galore.yml"
         wrapper:
-            "v5.5.1/bio/trim_galore/se"
+            "v9.9.0/bio/trim_galore/se"
