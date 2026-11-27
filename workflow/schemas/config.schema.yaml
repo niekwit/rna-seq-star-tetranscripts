@@ -93,6 +93,19 @@ properties:
         type: integer
         description: "Bin size for DeepTools"
         default: 10
+      extra_params:
+        type: string
+        description: "Additional arguments to pass to deepTools bamCoverage"
+        default: ""
+
+  trim_galore:
+    type: object
+    description: "Trim Galore parameters"
+    properties:
+      extra_params:
+        type: string
+        description: "Additional arguments to pass to Trim Galore"
+        default: ""
   
   resources:
     type: object

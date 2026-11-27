@@ -11,6 +11,9 @@ spike_in:
   gtf: /path/to/ERCC.gtf
   fasta: /path/to/ERCC.fasta
 
+trim_galore:
+  extra_params: "" # additional arguments to pass to Trim Galore (e.g. "--length 25"; --fastqc is not allowed)
+
 mapping: # STAR mapping parameters
   outFilterMultimapNmax: 100
   winAnchorMultimapNmax: 100
@@ -32,6 +35,7 @@ telocal:
 deeptools:
   binsize: 50
   normalisation: RPKM
+  extra_params: "" # additional arguments to pass to bamCoverage (e.g. "--smoothLength 150")
 
 # Integration with NGS Tracker for workflow registration and file attachment
 # https://github.com/niekwit/ngs-tracker

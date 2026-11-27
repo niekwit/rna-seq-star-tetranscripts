@@ -43,12 +43,14 @@ Place your raw reads (`.fastq.gz`) in the `reads/` directory. For single-end dat
 | `spike_in.name`                 | Pattern matching spike-in feature names (e.g. `ERCC-`)                                                                          |
 | `spike_in.gtf`                  | Path to spike-in GTF file                                                                                                       |
 | `spike_in.fasta`                | Path to spike-in FASTA file                                                                                                     |
+| `trim_galore.extra_params`      | Any additional Trim Galore arguments                                                                                            |
 | `mapping.outFilterMultimapNmax` | Max number of multi-mapping loci allowed (default: `100`)                                                                       |
 | `mapping.winAnchorMultimapNmax` | Max multi-mapping loci for anchor windows (default: `100`)                                                                      |
 | `mapping.extra_params`          | Any additional STAR arguments                                                                                                   |
 | `split_bam`                     | Split BAMs by chromosome before TE counting — recommended for large datasets on a cluster                                       |
 | `deeptools.binsize`             | Bin size (bp) for bigWig generation                                                                                             |
 | `deeptools.normalisation`       | Normalisation method: `RPKM`, `FPKM`, or `TPM`                                                                                  |
+| `deeptools.extra_params`        | Any additional deepTools `bamCoverage` arguments                                                                                |
 
 #### `config/samples.csv`
 
