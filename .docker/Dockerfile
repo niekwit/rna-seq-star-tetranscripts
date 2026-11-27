@@ -1,6 +1,6 @@
 FROM condaforge/miniforge3:latest
 LABEL io.github.snakemake.containerized="true"
-LABEL io.github.snakemake.conda_env_hash="83c68a2161fc26211943185ce48005234d9ea6f6f85ca72c3d696c30ab82c0af"
+LABEL io.github.snakemake.conda_env_hash="698f3853b94fc1bab8a8d529e6495e2f4d6af92a007cffedf8484952b2a21011"
 
 # Step 2: Retrieve conda environments
 
@@ -31,16 +31,19 @@ ADD https://github.com/snakemake/snakemake-wrappers/raw/v5.5.1/bio/samtools/inde
 
 # Conda environment:
 #   source: workflow/envs/deeptools.yml
-#   prefix: /conda-envs/c3af500606597b948946bf39685e5a98
+#   prefix: /conda-envs/2f475ea6d9384adf0f5bbc4eec139d3f
 #   name: deeptools
 #   channels: 
 #     - conda-forge
 #     - bioconda
 #     - defaults
 #   dependencies:
-#     - deeptools=4.1.0
-RUN mkdir -p /conda-envs/c3af500606597b948946bf39685e5a98
-COPY workflow/envs/deeptools.yml /conda-envs/c3af500606597b948946bf39685e5a98/environment.yaml
+#     # Pinned to this exact build: deepTools >=4 has a compiled Rust core, so a
+#     # new build could need a newer glibc than older hosts (e.g. Ubuntu 20.04,
+#     # glibc 2.31) provide. This build needs glibc <=2.17 and was tested on 20.04.
+#     - deeptools=4.1.0=py313h9a1e870_1
+RUN mkdir -p /conda-envs/2f475ea6d9384adf0f5bbc4eec139d3f
+COPY workflow/envs/deeptools.yml /conda-envs/2f475ea6d9384adf0f5bbc4eec139d3f/environment.yaml
 
 # Conda environment:
 #   source: workflow/envs/deseq2.yml
@@ -135,7 +138,7 @@ COPY workflow/envs/trim_galore.yml /conda-envs/4df970466a873ab6bad20311e5c763da/
 
 RUN conda env create --prefix /conda-envs/24b8923f8e4abe077ffe95b01bfc1652 --file /conda-envs/24b8923f8e4abe077ffe95b01bfc1652/environment.yaml && \
     conda env create --prefix /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b --file /conda-envs/85a51d707f59b4dd6fc7102fa747fe0b/environment.yaml && \
-    conda env create --prefix /conda-envs/c3af500606597b948946bf39685e5a98 --file /conda-envs/c3af500606597b948946bf39685e5a98/environment.yaml && \
+    conda env create --prefix /conda-envs/2f475ea6d9384adf0f5bbc4eec139d3f --file /conda-envs/2f475ea6d9384adf0f5bbc4eec139d3f/environment.yaml && \
     conda env create --prefix /conda-envs/d5cd58d499e48dfcf2ddba99fbbc70ed --file /conda-envs/d5cd58d499e48dfcf2ddba99fbbc70ed/environment.yaml && \
     conda env create --prefix /conda-envs/8bda2bb25358eea446fa54587cd1f747 --file /conda-envs/8bda2bb25358eea446fa54587cd1f747/environment.yaml && \
     conda env create --prefix /conda-envs/ad2411a11f8886f06eaf5ae0af7a2582 --file /conda-envs/ad2411a11f8886f06eaf5ae0af7a2582/environment.yaml && \
