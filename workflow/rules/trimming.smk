@@ -8,6 +8,8 @@ if PAIRED_END:
             report_fwd="results/trimmed/{sample}_R1_001.fastq.gz_trimming_report.txt",
             fasta_rev=temp("results/trimmed/{sample}_val_2.fq.gz"),
             report_rev="results/trimmed/{sample}_R2_001.fastq.gz_trimming_report.txt",
+        params:
+            extra=config.get("trim_galore", {}).get("extra_params", ""),
         threads: 8
         resources:
             runtime=30,
@@ -26,6 +28,8 @@ else:
         output:
             fasta=temp("results/trimmed/{sample}.fq.gz"),
             report="results/trimmed/{sample}.fastq.gz_trimming_report.txt",
+        params:
+            extra=config.get("trim_galore", {}).get("extra_params", ""),
         threads: 8
         resources:
             runtime=30,

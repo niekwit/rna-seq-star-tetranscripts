@@ -7,6 +7,7 @@ rule bam_to_bigwig:
     params:
         binsize=config["deeptools"]["binsize"],
         norm=config["deeptools"]["normalisation"],
+        extra=config["deeptools"].get("extra_params", ""),
     threads: 4
     resources:
         runtime=30,
@@ -21,4 +22,5 @@ rule bam_to_bigwig:
         "-o {output} "
         "--binSize {params.binsize} "
         "--normalizeUsing {params.norm} "
+        "{params.extra} "
         "2> {log}"
