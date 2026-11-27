@@ -5,24 +5,21 @@ tracks can be overlaid in a genome browser.
 
 bamCoverage --filterRNAstrand normalises each strand to the reads kept on that
 strand, which puts the two strands on different scales. Instead, the scale
-factor is computed here from all mapped alignments, using the same formula and
-read total (sum of the BAM index mapped counts) that bamCoverage uses for the
-unstranded bigWig, and passed with --normalizeUsing None --scaleFactor. Both
-strand tracks are then on the same scale as each other and as the unstranded
-bigWig.
+factor that bamCoverage computed for the unstranded bigWig (same BAM, same
+normalisation, same extra_params, so the same filters and chromosome
+exclusions) is reused with --normalizeUsing None --scaleFactor. Both strand
+tracks are then on the same scale as each other and as the unstranded bigWig.
 """
 
+import math
 import shlex
 import subprocess
 
-import pysam
-
 bam = snakemake.input["bam"]
-binsize = int(snakemake.params["binsize"])
-norm = snakemake.params["norm"]
+binsize = str(snakemake.params["binsize"])
 extra = shlex.split(snakemake.params["extra"])
 strand = snakemake.params["strand"]
-threads = snakemake.threads
+threads = str(snakemake.threads)
 log = snakemake.log[0]
 
 # --filterRNAstrand assumes a dUTP (reverse-stranded) library, where
@@ -37,48 +34,38 @@ else:
         f"Stranded bigWig files need a stranded library, but strand is '{strand}'"
     )
 
-# Total mapped alignments, as counted by bamCoverage for normalisation
-with pysam.AlignmentFile(bam) as fh:
-    mapped = sum(s.mapped for s in fh.get_index_statistics())
+# Scale factor computed by bamCoverage for the unstranded bigWig
+with open(snakemake.input["scale"]) as fh:
+    scale = float(fh.read().strip())
 
-if mapped == 0:
-    raise ValueError(f"No mapped reads in {bam}")
-
-# Same formulas as bamCoverage --normalizeUsing RPKM/CPM
-if norm == "RPKM":
-    scale = 1e6 / mapped * 1000 / binsize
-elif norm == "CPM":
-    scale = 1e6 / mapped
-elif norm == "None":
-    scale = 1.0
-else:
-    raise ValueError(
-        f"Normalisation '{norm}' is not supported for stranded bigWig files "
-        "(use RPKM, CPM or None)"
-    )
+if not math.isfinite(scale) or scale <= 0:
+    raise ValueError(f"Invalid scale factor {scale} in {snakemake.input['scale']}")
 
 with open(log, "w") as log_fh:
-    log_fh.write(f"Mapped alignments: {mapped}\nScale factor ({norm}): {scale}\n")
+    log_fh.write(f"Scale factor from unstranded bamCoverage run: {scale}\n")
     log_fh.flush()
 
     for direction, sign in (("plus", 1), ("minus", -1)):
+        # --binSize comes before extra_params so that an override there
+        # matches the unstranded run; the normalisation and strand options
+        # come last so that extra_params cannot override them.
         cmd = [
             "bamCoverage",
             "-p",
-            str(threads),
+            threads,
             "-b",
             bam,
             "-o",
             snakemake.output[direction],
             "--binSize",
-            str(binsize),
+            binsize,
+            *extra,
             "--filterRNAstrand",
             rna_strand[direction],
             "--normalizeUsing",
             "None",
             "--scaleFactor",
             str(sign * scale),
-            *extra,
         ]
         log_fh.write(f"\n{shlex.join(cmd)}\n")
         log_fh.flush()

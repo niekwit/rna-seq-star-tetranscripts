@@ -50,8 +50,8 @@ Place your raw reads (`.fastq.gz`) in the `reads/` directory. For single-end dat
 | `split_bam`                     | Split BAMs by chromosome before TE counting — recommended for large datasets on a cluster                                       |
 | `deeptools.binsize`             | Bin size (bp) for bigWig generation                                                                                             |
 | `deeptools.normalisation`       | Normalisation method: `RPKM`, `FPKM`, or `TPM`                                                                                  |
-| `deeptools.extra_params`        | Any additional deepTools `bamCoverage` arguments                                                                                |
-| `deeptools.stranded`            | Also create plus- and minus-strand bigWigs (minus-strand values negative). Needs a stranded library; `RPKM` or `CPM` only       |
+| `deeptools.extra_params`        | Any additional deepTools `bamCoverage` arguments. deepTools 4 has no `--ignoreDuplicates`; do not set `--normalizeUsing` or `--scaleFactor` here |
+| `deeptools.stranded`            | Also create plus- and minus-strand bigWigs (minus-strand values negative), on the same scale as the unstranded bigWig. Needs a stranded library |
 
 #### `config/samples.csv`
 
