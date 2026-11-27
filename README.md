@@ -51,6 +51,7 @@ Place your raw reads (`.fastq.gz`) in the `reads/` directory. For single-end dat
 | `deeptools.binsize`             | Bin size (bp) for bigWig generation                                                                                             |
 | `deeptools.normalisation`       | Normalisation method: `RPKM`, `FPKM`, or `TPM`                                                                                  |
 | `deeptools.extra_params`        | Any additional deepTools `bamCoverage` arguments                                                                                |
+| `deeptools.stranded`            | Also create plus- and minus-strand bigWigs (minus-strand values negative). Needs a stranded library; `RPKM` or `CPM` only       |
 
 #### `config/samples.csv`
 
@@ -106,7 +107,7 @@ Results are written to the `results/` directory:
 | `results/trimmed/`  | Adapter-trimmed reads                                                          |
 | `results/mapped/`   | STAR-aligned BAM files and per-sample mapping stats                            |
 | `results/te_count/` | TEcount count tables (genes + TEs)                                             |
-| `results/bigwig/`   | RPKM-normalised bigWig tracks                                                  |
+| `results/bigwig/`   | RPKM-normalised bigWig tracks; `stranded/` holds plus- and minus-strand tracks  |
 | `results/deseq2/`   | DESeq2 results CSVs for each comparison (genes and TEs separately)             |
 | `results/plots/`    | Volcano plots, PCA, sample distance heatmap, mapping rates, and TE class plots |
 

@@ -33,6 +33,7 @@ deeptools:
   normalisation: RPKM
   binsize: 1000
   extra_params: "" # additional arguments to pass to bamCoverage (e.g. "--smoothLength 150")
+  stranded: True # also create plus- and minus-strand bigWigs (minus strand negative); ignored if strand is unstranded
 
 # Integration with NGS Tracker for workflow registration and file attachment
 # https://github.com/niekwit/ngs-tracker

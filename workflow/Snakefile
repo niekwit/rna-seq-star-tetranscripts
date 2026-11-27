@@ -71,6 +71,19 @@ if config["telocal"]["apply"]:
         "results/telocal_bed/{comparison}_up.bed", comparison=COMPARISONS
     )
 
+if config["deeptools"].get("stranded", False):
+    if config["strand"] == "unstranded":
+        logger.warning(
+            "deeptools.stranded is set, but strand is 'unstranded': "
+            "skipping stranded bigWig files"
+        )
+    else:
+        rule_all_input += expand(
+            "results/bigwig/stranded/{sample}_{direction}.bw",
+            sample=SAMPLES,
+            direction=["plus", "minus"],
+        )
+
 
 rule all:
     input:
