@@ -36,6 +36,7 @@ deeptools:
   binsize: 50
   normalisation: RPKM
   extra_params: "" # additional arguments to pass to bamCoverage (e.g. "--smoothLength 150")
+  stranded: True # also create plus- and minus-strand bigWigs (minus strand negative); ignored if strand is unstranded
 
 # Integration with NGS Tracker for workflow registration and file attachment
 # https://github.com/niekwit/ngs-tracker
@@ -49,7 +50,7 @@ ngs_tracker:
   project_id: 3
   #run_id: 1 # optional, if not provided a new run will be created
   workflow_name: "rna-seq-star-tetranscripts"
-  workflow_tag: "v0.6.0"
+  workflow_tag: "v0.9.0"
   workflow_system: "snakemake" # snakemake | nextflow | cwl | other
   description: "TE RNA-seq"
   tags:

@@ -97,6 +97,10 @@ properties:
         type: string
         description: "Additional arguments to pass to deepTools bamCoverage"
         default: ""
+      stranded:
+        type: boolean
+        description: "Also create plus- and minus-strand bigWig files (minus-strand signal is negative); needs a stranded library"
+        default: false
 
   trim_galore:
     type: object

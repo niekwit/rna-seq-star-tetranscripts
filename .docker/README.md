@@ -8,8 +8,8 @@ These images are shared via [Docker Hub](https://hub.docker.com/repository/docke
 
 ```shell
 snakemake --containerize > Dockerfile
-docker build -t niekwit/rna-seq-star-tetranscripts:v0.8.0 .
+docker build -t niekwit/rna-seq-star-tetranscripts:v0.9.0 .
 docker login
-docker push niekwit/rna-seq-star-tetranscripts:v0.8.0
+docker push niekwit/rna-seq-star-tetranscripts:v0.9.0
 
 ```
