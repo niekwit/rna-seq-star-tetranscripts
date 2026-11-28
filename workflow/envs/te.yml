@@ -5,6 +5,15 @@ channels:
   - defaults
 dependencies:
   - tetranscripts=2.2.3
+  # tetranscripts depends on bioconductor-deseq (DESeq1), whose last build is for
+  # R 4.0. Unpinned, the solver backtracks through every newer R/Python/pysam
+  # build to reach that, which takes many minutes. Pinning the versions it ends
+  # up with anyway keeps the solve fast.
+  - python=3.10
+  - r-base=4.0.5
+  - bioconductor-deseq=1.39.0
+  - bioconductor-deseq2=1.28.0
+  - pysam=0.20.0
   - pip
   - pip:
       - TElocal==1.1.3
